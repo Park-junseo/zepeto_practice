@@ -157,13 +157,14 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
             // this.rotateX = this.currentTarget.rotation.eulerAngles.x;
             // this.rotateY = this.currentTarget.rotation.eulerAngles.y;
 
-            const inverse = Quaternion.Inverse(this.currentTarget.rotation).eulerAngles;
+            //const inverse = Quaternion.Inverse(this.currentTarget.rotation).eulerAngles;
 
             // this.rotateY = this.currentTarget.eulerAngles.x;
             // this.rotateX = this.currentTarget.eulerAngles.y;
-            this.rotateY = inverse.x;
-            this.rotateX = inverse.y;
-            console.log(`[onEnable] ${this.rotateY}`);
+
+            this.rotateY = this.currentTarget.eulerAngles.x;
+            this.rotateX = this.currentTarget.eulerAngles.y - 180;
+            console.log(`[onEnable] ${this.rotateY},${this.rotateX}`);
             
         }
     }

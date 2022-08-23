@@ -1,5 +1,5 @@
 import { ZepetoScriptBehaviour } from 'ZEPETO.Script'
-import { Transform, Animator, AvatarIKGoal } from 'UnityEngine'
+import { Transform, Animator, AvatarIKGoal, Quaternion , Vector3, HumanBodyBones } from 'UnityEngine'
 
 export default class IKController extends ZepetoScriptBehaviour {
 
@@ -8,14 +8,26 @@ export default class IKController extends ZepetoScriptBehaviour {
     // rightHand's IK target
     private gripTarget: Transform;
 
+    private bodySource: Transform;
+
     // Body and head weight setting for target
     // Controls how strongly the body reacts to the movement of the target
-    private bodyWeight: number = 0.3;
+    private bodyWeight: number = 0.7;
     private headWeight: number = 0.7; 
 
     //Whether or not to apply IK
     private useIKWeight: boolean = false;
     private animator: Animator;
+
+    private ikRotation: Quaternion;
+
+    private rightAramBones = [
+        HumanBodyBones.RightHand,
+        HumanBodyBones.RightLowerArm,
+        HumanBodyBones.RightUpperArm,
+        //HumanBodyBones.RightShoulder,
+
+    ]
 
     Start() {
         this.animator = this.GetComponent<Animator>();
@@ -29,9 +41,10 @@ export default class IKController extends ZepetoScriptBehaviour {
     }
 
     // Set Target to look at and Grip to reach out
-    public SetTargetAndGrip(lookAtTarget: Transform, gripTarget: Transform) {
+    public SetTargetAndGrip(lookAtTarget: Transform, gripTarget: Transform, bodySource: Transform) {
         this.lookAtTarget = lookAtTarget;
         this.gripTarget = gripTarget;
+        this.bodySource = bodySource;
     }
 
     OnAnimatorIK(layerIndex: number) {
@@ -47,14 +60,30 @@ export default class IKController extends ZepetoScriptBehaviour {
             this.gripTarget == null)
             return;
 
+        this.rightAramBones.forEach((bones)=>{
+            this.animator.SetBoneLocalRotation(bones, this.ikRotation);
+        });
+
         // Set the look weight when the body and head looks at the target. 
         this.animator.SetLookAtWeight(1, this.bodyWeight, this.headWeight);
         // set lookAt target
         this.animator.SetLookAtPosition(this.lookAtTarget.position);
 
+        // this.animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
+        // this.animator.SetIKRotation(AvatarIKGoal.RightHand, this.gripTarget.rotation);//Quaternion.Euler(new Vector3(3,-3,3)));
+
+        // this.animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
+        // this.animator.SetIKRotation(AvatarIKGoal.RightHand, this.ikRotation);//Quaternion.Euler(new Vector3(3,-3,3)));
+
         // Set target weight for rightHand
         this.animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
         // Set the rightHand to Grip where it extends
         this.animator.SetIKPosition(AvatarIKGoal.RightHand, this.gripTarget.position);
+
+        console.log(`[OnAnimatorIK] ${this.gripTarget.gameObject.name}/${this.lookAtTarget.gameObject.name}: ${this.gripTarget.position.ToString()}/${this.lookAtTarget.position.ToString()}`);
+    }
+
+    LateUpdate() {
+        this.ikRotation = Quaternion.FromToRotation(this.bodySource.position, this.gripTarget.position);
     }
 }

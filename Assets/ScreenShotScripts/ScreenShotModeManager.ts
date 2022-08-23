@@ -53,9 +53,11 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         selfieCamera.InitSetting(character.gameObject.transform);
         
         let grip = selfieCamera.GetGripObject();
-        let playerAnimator = this.localPlayer.character.gameObject.GetComponentInChildren<Animator>();
-        this.iKController = this.iKController || playerAnimator.gameObject.AddComponent<IKController>();
-        this.iKController.SetTargetAndGrip(target.transform, grip.transform);
+        if(!this.iKController) {
+            let playerAnimator = this.localPlayer.character.gameObject.GetComponentInChildren<Animator>();
+            this.iKController = playerAnimator.gameObject.AddComponent<IKController>();
+        }
+        this.iKController.SetTargetAndGrip(target.transform, grip.transform, character.transform);
 
         // 3. Fix the selfie stick on the character's right hand
         this.selfieStick = this.selfieStick || GameObject.Instantiate<GameObject>(this.selfieStickPrefab);
