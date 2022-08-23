@@ -1,0 +1,31 @@
+fileFormatVersion: 2
+guid: a3783e3437fce904ab144e193c9a0f04
+importerOverride: ZEPETO.Script.Compiler:ZEPETO.Script:TypescriptAssetImporter
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: -1123457745, guid: 54cf806323ffe4418a4ce4cc63fe6b9d, type: 3}
+  isAssemblyDeclarations: 0
+  assembly: 
+  generateAllTypes: 1
+  types: []
+  generateWrapper: 0
+  overrideWrapperTypes: 0
+  wrapperTypes: []
+  WrapperFilters: []
+  wrapperOutputDirectory: Generated
+  compiledResult: '{"source":"\"use strict\";\r\nObject.defineProperty(exports, \"__esModule\",
+    { value: true });\r\nconst ZEPETO_Script_1 = require(\"ZEPETO.Script\");\r\nclass
+    ExtraComponent extends ZEPETO_Script_1.ZepetoScriptBehaviour {\r\n    Start()
+    {\r\n        this.message = \"Hi zepeto!\";\r\n        this.count = 0;\r\n   
+    }\r\n    Update() {\r\n        this.stringProperty = `${this.message} : ${this.count++}`;\r\n   
+    }\r\n    GetCount() {\r\n        return this.count;\r\n    }\r\n    SetCount(newCount)
+    {\r\n        this.count = newCount;\r\n    }\r\n}\r\nexports.default = ExtraComponent;\r\n//#
+    sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiRXh0cmFDb21wb25lbnQuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJFeHRyYUNvbXBvbmVudC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUFBLGlEQUFxRDtBQUVyRCxNQUFxQixjQUFlLFNBQVEscUNBQXFCO0lBSzdELEtBQUs7UUFDRCxJQUFJLENBQUMsT0FBTyxHQUFHLFlBQVksQ0FBQztRQUM1QixJQUFJLENBQUMsS0FBSyxHQUFHLENBQUMsQ0FBQztJQUNuQixDQUFDO0lBRUQsTUFBTTtRQUNGLElBQUksQ0FBQyxjQUFjLEdBQUcsR0FBRyxJQUFJLENBQUMsT0FBTyxNQUFNLElBQUksQ0FBQyxLQUFLLEVBQUUsRUFBRSxDQUFDO0lBQzlELENBQUM7SUFFRCxRQUFRO1FBQ0osT0FBTyxJQUFJLENBQUMsS0FBSyxDQUFDO0lBQ3RCLENBQUM7SUFFRCxRQUFRLENBQUMsUUFBWTtRQUNqQixJQUFJLENBQUMsS0FBSyxHQUFHLFFBQVEsQ0FBQztJQUMxQixDQUFDO0NBRUo7QUF0QkQsaUNBc0JDIn0=","assetPath":"Assets/Test
+    Script/ExtraComponent.ts","manifest":{"properties":[{"assembly":"mscorlib","name":"stringProperty","type":"System.String","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]}],"name":"ExtraComponent","description":""},"isCompiled":true}'
+  typescriptHash: 4e2d47369b3f265fb863728b8fda3e5e
+  onlyWriteTrigger: 0

@@ -1,0 +1,37 @@
+fileFormatVersion: 2
+guid: 56692565f834a0e4ca2a2bf155cb2a18
+importerOverride: ZEPETO.Script.Compiler:ZEPETO.Script:TypescriptAssetImporter
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: -1123457745, guid: 54cf806323ffe4418a4ce4cc63fe6b9d, type: 3}
+  isAssemblyDeclarations: 0
+  assembly: 
+  generateAllTypes: 1
+  types: []
+  generateWrapper: 0
+  overrideWrapperTypes: 0
+  wrapperTypes: []
+  WrapperFilters: []
+  wrapperOutputDirectory: Generated
+  compiledResult: '{"source":"\"use strict\";\r\nObject.defineProperty(exports, \"__esModule\",
+    { value: true });\r\n///import { ZepetoScriptBehaviour } from ''ZEPETO.Script''\r\nconst
+    UnityEngine_1 = require(\"UnityEngine\");\r\nclass Properties extends ZepetoScriptBehaviour
+    {\r\n    Update() {\r\n        //console.log(`floatValue : ${this.floatValue}`);\r\n       
+    //console.log(`strValue : ${this.strValue}`);\r\n        // rotate cube a\r\n       
+    if (this.gameObjectValue) {\r\n            var transform = this.gameObjectValue.GetComponent($typeof(UnityEngine_1.Transform));\r\n           
+    transform.Rotate(UnityEngine_1.Vector3.op_Multiply(this.vectorValue, 2));\r\n       
+    }\r\n        else {\r\n            console.warn(\"null gameobject\");\r\n       
+    }\r\n        // rotate cube b\r\n        if (this.transformValue) {\r\n           
+    this.transformValue.Rotate(this.vectorValue);\r\n        }\r\n        else {\r\n           
+    console.warn(\"null transform\");\r\n        }\r\n    }\r\n}\r\nexports.default
+    = Properties;\r\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUHJvcGVydGllcy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIlByb3BlcnRpZXMudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFBQSx3REFBd0Q7QUFDeEQsNkNBQTBEO0FBRTFELE1BQXFCLFVBQVcsU0FBUSxxQkFBcUI7SUFxQ3pELE1BQU07UUFFRixpREFBaUQ7UUFDakQsNkNBQTZDO1FBQzdDLGdCQUFnQjtRQUNoQixJQUFHLElBQUksQ0FBQyxlQUFlLEVBQ3ZCO1lBQ0ksSUFBSSxTQUFTLEdBQUcsSUFBSSxDQUFDLGVBQWUsQ0FBQyxZQUFZLFNBQUMsdUJBQVMsRUFBRyxDQUFDO1lBQy9ELFNBQVMsQ0FBQyxNQUFNLENBL0NwQixxQkFBTyxDQWtFNnpvQixXQUFZLENBbkIzem9CLElBQUksQ0FBQyxXQUFXLEVBQUcsQ0FBQyxFQUFDLENBQUM7U0FDMUM7YUFDSTtZQUNELE9BQU8sQ0FBQyxJQUFJLENBQUMsaUJBQWlCLENBQUMsQ0FBQztTQUNuQztRQUVELGdCQUFnQjtRQUNoQixJQUFHLElBQUksQ0FBQyxjQUFjLEVBQ3RCO1lBQ0ksSUFBSSxDQUFDLGNBQWMsQ0FBQyxNQUFNLENBQUMsSUFBSSxDQUFDLFdBQVcsQ0FBQyxDQUFDO1NBQ2hEO2FBRUQ7WUFDSSxPQUFPLENBQUMsSUFBSSxDQUFDLGdCQUFnQixDQUFDLENBQUM7U0FDbEM7SUFHTCxDQUFDO0NBRUo7QUFoRUQsNkJBZ0VDIn0=","assetPath":"Assets/Test
+    Script/Properties.ts","manifest":{"properties":[{"assembly":"mscorlib","name":"floatValue","type":"System.Single","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]},{"assembly":"mscorlib","name":"intValue","type":"System.Int32","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]},{"assembly":"mscorlib","name":"strValue","type":"System.String","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]},{"assembly":"UnityEngine.CoreModule","name":"vectorValue","type":"UnityEngine.Vector3","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]},{"assembly":"UnityEngine.CoreModule","name":"gameObjectValue","type":"UnityEngine.GameObject","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]},{"assembly":"UnityEngine.CoreModule","name":"transformValue","type":"UnityEngine.Transform","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]},{"assembly":"mscorlib","name":"floatValues","type":"System.Single[]","isArray":true,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]},{"assembly":"mscorlib","name":"strValue2","type":"System.String","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[{"name":"HideInInspector","args":[]}]},{"assembly":"mscorlib","name":"strValue3","type":"System.String","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[{"name":"SerializeField","args":[]}]},{"assembly":"mscorlib","name":"stringProperty","type":"System.String","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[{"name":"Header","args":["\"Header
+    Title\""]}]},{"assembly":"UnityEngine.CoreModule","name":"transformProperty","type":"UnityEngine.Transform","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[{"name":"Space","args":["10"]}]},{"assembly":"mscorlib","name":"numberProperty","type":"System.Single","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[{"name":"Tooltip","args":["\"This
+    is Tooltip\""]}]}],"name":"Properties","description":""},"isCompiled":true}'
+  typescriptHash: f14c3062a07ace28ceea0fabc52dc0ae
+  onlyWriteTrigger: 0

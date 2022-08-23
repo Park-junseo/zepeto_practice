@@ -1,0 +1,39 @@
+fileFormatVersion: 2
+guid: 3b3d216db30ebe64a862fc05f909977d
+importerOverride: ZEPETO.Script.Compiler:ZEPETO.Script:TypescriptAssetImporter
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: -1123457745, guid: 54cf806323ffe4418a4ce4cc63fe6b9d, type: 3}
+  isAssemblyDeclarations: 0
+  assembly: 
+  generateAllTypes: 1
+  types: []
+  generateWrapper: 0
+  overrideWrapperTypes: 0
+  wrapperTypes: []
+  WrapperFilters: []
+  wrapperOutputDirectory: Generated
+  compiledResult: '{"source":"\"use strict\";\r\nObject.defineProperty(exports, \"__esModule\",
+    { value: true });\r\nconst ZEPETO_Script_1 = require(\"ZEPETO.Script\");\r\nconst
+    ZEPETO_Character_Controller_1 = require(\"ZEPETO.Character.Controller\");\r\nclass
+    DoubleJumpExample extends ZEPETO_Script_1.ZepetoScriptBehaviour {\r\n    Start()
+    {\r\n        // Create character\r\n        ZEPETO_Character_Controller_1.ZepetoPlayers.instance.OnAddedLocalPlayer.AddListener(()
+    => {\r\n            this.zepetoCharacter = ZEPETO_Character_Controller_1.ZepetoPlayers.instance.LocalPlayer.zepetoPlayer.character;\r\n       
+    });\r\n        this.zepetoCharacter = ZEPETO_Character_Controller_1.ZepetoPlayers.instance.LocalPlayer.zepetoPlayer.character;\r\n       
+    // Add script component\r\n        this.shotButton.onClick.AddListener(() =>
+    {\r\n            if (this.zepetoCharacter == null)\r\n                return;\r\n           
+    console.log(`CurrentState: ${this.zepetoCharacter.CurrentState} / ${ZEPETO_Character_Controller_1.CharacterState.Jump}`);\r\n           
+    if (this.zepetoCharacter.CurrentState === ZEPETO_Character_Controller_1.CharacterState.Jump)
+    {\r\n                this.zepetoCharacter.DoubleJump();\r\n            }\r\n           
+    else {\r\n                this.zepetoCharacter.Jump();\r\n            }\r\n       
+    });\r\n        console.log(`Ready UI jump`);\r\n    }\r\n    ConsoleLog(vector2)
+    {\r\n        console.log(vector2.ToString());\r\n    }\r\n}\r\nexports.default
+    = DoubleJumpExample;\r\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiRG91YmxlSnVtcEV4YW1wbGUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJEb3VibGVKdW1wRXhhbXBsZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUFBLGlEQUFvRDtBQUVwRCw2RUFBMkY7QUFFM0YsTUFBcUIsaUJBQWtCLFNBQVEscUNBQXFCO0lBR2hFLEtBQUs7UUFDQSxtQkFBbUI7UUFDbkIsMkNBQWEsQ0FBQyxRQUFRLENBQUMsa0JBQWtCLENBQUMsV0FBVyxDQUFDLEdBQUcsRUFBRTtZQUN2RCxJQUFJLENBQUMsZUFBZSxHQUFHLDJDQUFhLENBQUMsUUFBUSxDQUFDLFdBQVcsQ0FBQyxZQUFZLENBQUMsU0FBUyxDQUFDO1FBQ3JGLENBQUMsQ0FBQyxDQUFDO1FBRUgsSUFBSSxDQUFDLGVBQWUsR0FBRywyQ0FBYSxDQUFDLFFBQVEsQ0FBQyxXQUFXLENBQUMsWUFBWSxDQUFDLFNBQVMsQ0FBQztRQUVqRix1QkFBdUI7UUFDdkIsSUFBSSxDQUFDLFVBQVUsQ0FBQyxPQUFPLENBQUMsV0FBVyxDQUFDLEdBQUcsRUFBRTtZQUN0QyxJQUFHLElBQUksQ0FBQyxlQUFlLElBQUksSUFBSTtnQkFBRyxPQUFPO1lBRXpDLE9BQU8sQ0FBQyxHQUFHLENBQUMsaUJBQWlCLElBQUksQ0FBQyxlQUFlLENBQUMsWUFBWSxNQUFNLDRDQUFjLENBQUMsSUFBSSxFQUFFLENBQUMsQ0FBQTtZQUUxRixJQUFHLElBQUksQ0FBQyxlQUFlLENBQUMsWUFBWSxLQUFLLDRDQUFjLENBQUMsSUFBSSxFQUM1RDtnQkFDSSxJQUFJLENBQUMsZUFBZSxDQUFDLFVBQVUsRUFBRSxDQUFDO2FBQ3JDO2lCQUVEO2dCQUNJLElBQUksQ0FBQyxlQUFlLENBQUMsSUFBSSxFQUFFLENBQUM7YUFDL0I7UUFDSixDQUFDLENBQUMsQ0FBQztRQUVILE9BQU8sQ0FBQyxHQUFHLENBQUMsZUFBZSxDQUFDLENBQUM7SUFDbEMsQ0FBQztJQUVNLFVBQVUsQ0FBQyxPQUFnQjtRQUM5QixPQUFPLENBQUMsR0FBRyxDQUFDLE9BQU8sQ0FBQyxRQUFRLEVBQUUsQ0FBQyxDQUFDO0lBQ3BDLENBQUM7Q0FDSjtBQWpDRCxvQ0FpQ0MifQ==","assetPath":"Assets/Charactor
+    Script/DoubleJumpExample.ts","manifest":{"properties":[{"assembly":"UnityEngine.UI","name":"shotButton","type":"UnityEngine.UI.Button","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]}],"name":"DoubleJumpExample","description":""},"isCompiled":true}'
+  typescriptHash: 7211b1e79f1b84dd3b48a5a2300b77a5
+  onlyWriteTrigger: 0

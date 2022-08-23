@@ -1,0 +1,32 @@
+fileFormatVersion: 2
+guid: 8e1e06351f544f543a8b7469509386e0
+importerOverride: ZEPETO.Script.Compiler:ZEPETO.Script:TypescriptAssetImporter
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: -1123457745, guid: 54cf806323ffe4418a4ce4cc63fe6b9d, type: 3}
+  isAssemblyDeclarations: 0
+  assembly: 
+  generateAllTypes: 1
+  types: []
+  generateWrapper: 0
+  overrideWrapperTypes: 0
+  wrapperTypes: []
+  WrapperFilters: []
+  wrapperOutputDirectory: Generated
+  compiledResult: '{"source":"\"use strict\";\r\nObject.defineProperty(exports, \"__esModule\",
+    { value: true });\r\nconst ZEPETO_Script_1 = require(\"ZEPETO.Script\");\r\nconst
+    UnityEngine_1 = require(\"UnityEngine\");\r\nclass Coroutine extends ZEPETO_Script_1.ZepetoScriptBehaviour
+    {\r\n    Start() {\r\n        this.current = 0;\r\n        console.log(`start
+    routine`);\r\n        this.StartCoroutine(this.DoRoutine());\r\n    }\r\n   
+    *DoRoutine() {\r\n        while (this.current < 30) {\r\n            yield null;\r\n           
+    console.log(`[${this.current++}] Wait to next routine..`);\r\n            yield
+    new UnityEngine_1.WaitForSeconds(1);\r\n        }\r\n    }\r\n}\r\nexports.default
+    = Coroutine;\r\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ29yb3V0aW5lLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiQ29yb3V0aW5lLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUEsaURBQW9EO0FBQ3BELDZDQUEyQztBQUMzQyxNQUFxQixTQUFVLFNBQVEscUNBQXFCO0lBSXpELEtBQUs7UUFFRCxJQUFJLENBQUMsT0FBTyxHQUFHLENBQUMsQ0FBQztRQUNqQixPQUFPLENBQUMsR0FBRyxDQUFDLGVBQWUsQ0FBQyxDQUFDO1FBQzdCLElBQUksQ0FBQyxjQUFjLENBQUMsSUFBSSxDQUFDLFNBQVMsRUFBRSxDQUFDLENBQUM7SUFDMUMsQ0FBQztJQUVELENBQUMsU0FBUztRQUNOLE9BQU0sSUFBSSxDQUFDLE9BQU8sR0FBRyxFQUFFLEVBQUc7WUFDdEIsTUFBTSxJQUFJLENBQUM7WUFDWCxPQUFPLENBQUMsR0FBRyxDQUFDLElBQUksSUFBSSxDQUFDLE9BQU8sRUFBRSwwQkFBMEIsQ0FBQyxDQUFDO1lBQzFELE1BQU0sSUFBSSw0QkFBYyxDQUFDLENBQUMsQ0FBQyxDQUFDO1NBQy9CO0lBQ0wsQ0FBQztDQUNIO0FBbEJELDRCQWtCQyJ9","assetPath":"Assets/Test
+    Script/Coroutine.ts","manifest":{"properties":[{"assembly":"mscorlib","name":"current","type":"System.Single","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[{"name":"SerializeField","args":[]}]}],"name":"Coroutine","description":""},"isCompiled":true}'
+  typescriptHash: 697a5a81c281208c1da3373ae46c56e0
+  onlyWriteTrigger: 0

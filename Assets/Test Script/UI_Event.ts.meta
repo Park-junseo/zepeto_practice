@@ -1,0 +1,31 @@
+fileFormatVersion: 2
+guid: 942cb180d21fd594281bf5e243977849
+importerOverride: ZEPETO.Script.Compiler:ZEPETO.Script:TypescriptAssetImporter
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: -1123457745, guid: 54cf806323ffe4418a4ce4cc63fe6b9d, type: 3}
+  isAssemblyDeclarations: 0
+  assembly: 
+  generateAllTypes: 1
+  types: []
+  generateWrapper: 0
+  overrideWrapperTypes: 0
+  wrapperTypes: []
+  WrapperFilters: []
+  wrapperOutputDirectory: Generated
+  compiledResult: '{"source":"\"use strict\";\r\nObject.defineProperty(exports, \"__esModule\",
+    { value: true });\r\nconst ZEPETO_Script_1 = require(\"ZEPETO.Script\");\r\nclass
+    UI_Event extends ZEPETO_Script_1.ZepetoScriptBehaviour {\r\n    Start() {\r\n       
+    this.btnUI.onClick.AddListener(() => {\r\n            // add button click event\r\n           
+    console.log(''btnUI onClick'');\r\n        });\r\n        this.sliderUI.onValueChanged.AddListener((v)
+    => {\r\n            // add slider event\r\n            console.log(`[${v}] sliderUI
+    onValueChanged`);\r\n        });\r\n    }\r\n}\r\nexports.default = UI_Event;\r\n//#
+    sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVUlfRXZlbnQuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJVSV9FdmVudC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUFBLGlEQUFxRDtBQUdyRCxNQUFxQixRQUFTLFNBQVEscUNBQXFCO0lBS3hELEtBQUs7UUFDRCxJQUFJLENBQUMsS0FBSyxDQUFDLE9BQU8sQ0FBQyxXQUFXLENBQUMsR0FBRSxFQUFFO1lBQy9CLHlCQUF5QjtZQUN6QixPQUFPLENBQUMsR0FBRyxDQUFDLGVBQWUsQ0FBQyxDQUFDO1FBQ2pDLENBQUMsQ0FBQyxDQUFDO1FBQ0gsSUFBSSxDQUFDLFFBQVEsQ0FBQyxjQUFjLENBQUMsV0FBVyxDQUFFLENBQUMsQ0FBQyxFQUFFLEVBQUU7WUFDNUMsbUJBQW1CO1lBQ25CLE9BQU8sQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLDJCQUEyQixDQUFDLENBQUM7UUFDbEQsQ0FBQyxDQUFDLENBQUM7SUFDUCxDQUFDO0NBQ0g7QUFmRCwyQkFlQyJ9","assetPath":"Assets/Test
+    Script/UI_Event.ts","manifest":{"properties":[{"assembly":"UnityEngine.UI","name":"sliderUI","type":"UnityEngine.UI.Slider","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]},{"assembly":"UnityEngine.UI","name":"btnUI","type":"UnityEngine.UI.Button","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]}],"name":"UI_Event","description":""},"isCompiled":true}'
+  typescriptHash: ae30fbe0719bb63b1312d706b41c8044
+  onlyWriteTrigger: 0

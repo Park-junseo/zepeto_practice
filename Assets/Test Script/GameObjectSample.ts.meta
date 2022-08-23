@@ -1,0 +1,37 @@
+fileFormatVersion: 2
+guid: c19d225696cdde8459aae88873ecec1d
+importerOverride: ZEPETO.Script.Compiler:ZEPETO.Script:TypescriptAssetImporter
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: -1123457745, guid: 54cf806323ffe4418a4ce4cc63fe6b9d, type: 3}
+  isAssemblyDeclarations: 0
+  assembly: 
+  generateAllTypes: 1
+  types: []
+  generateWrapper: 0
+  overrideWrapperTypes: 0
+  wrapperTypes: []
+  WrapperFilters: []
+  wrapperOutputDirectory: Generated
+  compiledResult: '{"source":"\"use strict\";\r\nObject.defineProperty(exports, \"__esModule\",
+    { value: true });\r\nconst ZEPETO_Script_1 = require(\"ZEPETO.Script\");\r\nconst
+    UnityEngine_1 = require(\"UnityEngine\");\r\nconst UnityEngine_2 = require(\"UnityEngine\");\r\nclass
+    GameObjectSample extends ZEPETO_Script_1.ZepetoScriptBehaviour {\r\n    Start()
+    {\r\n        //GameObject Create\r\n        // var tempObj = new GameObject();\r\n       
+    var obj = UnityEngine_2.Object.Instantiate(this.myInstance);\r\n        obj.transform.Translate(new
+    UnityEngine_2.Vector3(1, 1, 1));\r\n        ////GameObject Destroy\r\n       
+    //Object.Destroy(obj);\r\n        // GetComponent with Generic\r\n        var
+    myTransform = this.GetComponent($typeof(UnityEngine_2.Transform));\r\n       
+    // AddComponent with Generic\r\n        var animator = this.gameObject.AddComponent($typeof(UnityEngine_2.Animator));\r\n       
+    this.StartCoroutine(this.DestroyCounter(obj));\r\n        ;\r\n    }\r\n    *DestroyCounter(instance)
+    {\r\n        yield null;\r\n        yield new UnityEngine_1.WaitForSeconds(20);\r\n       
+    UnityEngine_2.Object.Destroy(instance);\r\n        console.log(\"Destroy\");\r\n   
+    }\r\n}\r\nexports.default = GameObjectSample;\r\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiR2FtZU9iamVjdFNhbXBsZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIkdhbWVPYmplY3RTYW1wbGUudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFBQSxpREFBcUQ7QUFDckQsNkNBQTJDO0FBQzNDLDZDQUFzRjtBQUV0RixNQUFxQixnQkFBaUIsU0FBUSxxQ0FBcUI7SUFJL0QsS0FBSztRQUNELG1CQUFtQjtRQUNuQixrQ0FBa0M7UUFDbEMsSUFBSSxHQUFHLEdBQUcsb0JBQU0sQ0FBQyxXQUFXLENBQUMsSUFBSSxDQUFDLFVBQVUsQ0FBQyxDQUFDO1FBRTlDLEdBQUcsQ0FBQyxTQUFTLENBQUMsU0FBUyxDQUFDLElBQUkscUJBQU8sQ0FBQyxDQUFDLEVBQUMsQ0FBQyxFQUFDLENBQUMsQ0FBQyxDQUFDLENBQUM7UUFFNUMsc0JBQXNCO1FBQ3RCLHNCQUFzQjtRQUV0Qiw0QkFBNEI7UUFDNUIsSUFBSSxXQUFXLEdBQUcsSUFBSSxDQUFDLFlBQVksU0FBQyx1QkFBUyxFQUFHLENBQUM7UUFFakQsNEJBQTRCO1FBQzVCLElBQUksUUFBUSxHQUFHLElBQUksQ0FBQyxVQUFVLENBQUMsWUFBWSxTQUFDLHNCQUFRLEVBQUcsQ0FBQTtRQUV2RCxJQUFJLENBQUMsY0FBYyxDQUFDLElBQUksQ0FBQyxjQUFjLENBQUMsR0FBRyxDQUFDLENBQUMsQ0FBQztRQUFBLENBQUM7SUFDbkQsQ0FBQztJQUVELENBQUMsY0FBYyxDQUFDLFFBQW1CO1FBQy9CLE1BQU0sSUFBSSxDQUFDO1FBQ1gsTUFBTSxJQUFJLDRCQUFjLENBQUMsRUFBRSxDQUFDLENBQUM7UUFDN0Isb0JBQU0sQ0FBQyxPQUFPLENBQUMsUUFBUSxDQUFDLENBQUM7UUFDekIsT0FBTyxDQUFDLEdBQUcsQ0FBQyxTQUFTLENBQUMsQ0FBQztJQUMzQixDQUFDO0NBQ0o7QUE3QkQsbUNBNkJDIn0=","assetPath":"Assets/Test
+    Script/GameObjectSample.ts","manifest":{"properties":[{"assembly":"UnityEngine.CoreModule","name":"myInstance","type":"UnityEngine.GameObject","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]}],"name":"GameObjectSample","description":""},"isCompiled":true}'
+  typescriptHash: 4a5229946cce2de84cf1765357f671b6
+  onlyWriteTrigger: 0

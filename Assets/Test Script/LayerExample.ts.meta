@@ -1,0 +1,45 @@
+fileFormatVersion: 2
+guid: efcf30b1d11c8ea4fb7c9750fd049c78
+importerOverride: ZEPETO.Script.Compiler:ZEPETO.Script:TypescriptAssetImporter
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: -1123457745, guid: 54cf806323ffe4418a4ce4cc63fe6b9d, type: 3}
+  isAssemblyDeclarations: 0
+  assembly: 
+  generateAllTypes: 1
+  types: []
+  generateWrapper: 0
+  overrideWrapperTypes: 0
+  wrapperTypes: []
+  WrapperFilters: []
+  wrapperOutputDirectory: Generated
+  compiledResult: "{\"source\":\"\\\"use strict\\\";\\r\\nObject.defineProperty(exports,
+    \\\"__esModule\\\", { value: true });\\r\\nconst ZEPETO_Script_1 = require(\\\"ZEPETO.Script\\\");\\r\\nconst
+    UnityEngine_1 = require(\\\"UnityEngine\\\");\\r\\nclass LayerExample extends
+    ZEPETO_Script_1.ZepetoScriptBehaviour {\\r\\n    Update() {\\r\\n        this.MouseControl();\\r\\n   
+    }\\r\\n    MouseControl() {\\r\\n        if (UnityEngine_1.Input.GetMouseButtonDown(0))
+    {\\r\\n            let ray = UnityEngine_1.Camera.main.ScreenPointToRay(UnityEngine_1.Input.mousePosition);\\r\\n           
+    // RaycatHit \uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD \uFFFD\u0136\uFFFD\uFFFD\uFFFD\u0377\uFFFD
+    \uFFFD\u0471\uFFFD\uFFFD \uFFFD\uFFFD\uFFFD\uFFFD, $ref \uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\u06B7\uFFFD
+    wrapping \uFFFD\u03F4\uFFFD \uFFFD\u03BA\u043F\uFFFD \uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\u05BC\uFFFD\uFFFD\uFFFD.\\r\\n           
+    // (\uFFFD\u0170\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD \uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD
+    out\uFFFD\uFFFD \uFFFD\u02BF\uFFFD\uFFFD\uFFFD \uFFFD\uFFFD\u0232\uFFFD\u0331\u2DA7\uFFFD\uFFFD\uFFFD\uFFFD)
+    \uFFFD\uFFFD\xFC \uFFFD\uFFFD\uFFFD\uFFFD \uFFFD\uFFFD\uFFFD\uFFFD \uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD
+    \uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\u0774\u03F4\uFFFD.            \\r\\n           
+    let ref = $ref();\\r\\n            if (UnityEngine_1.Physics.Raycast(ray, ref,
+    1000)) {\\r\\n                // RaycatHit \uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\u0378\uFFFD
+    \u022E\uFFFD\uFFFD\uFFFD\u03F1\uFFFD \uFFFD\uFFFD\uFFFD\uFFFD, $unref \uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\u06B7\uFFFD
+    \uFFFD\u067D\uFFFD unwrapping \uFFFD\u03F4\uFFFD \uFFFD\u03BA\u043F\uFFFD \uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\uFFFD\u05BC\uFFFD\uFFFD\uFFFD.\\r\\n               
+    let hitInfo = $unref(ref);\\r\\n                console.log(`Detect Hit!`);\\r\\n               
+    console.log(`hitInfo.collider.name : ${hitInfo.collider.name}`);\\r\\n           
+    }\\r\\n            else {\\r\\n                console.log(`Failed to Detect
+    Collision`);\\r\\n            }\\r\\n        }\\r\\n    }\\r\\n}\\r\\nexports.default
+    = LayerExample;\\r\\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiTGF5ZXJFeGFtcGxlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiTGF5ZXJFeGFtcGxlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUEsaURBQXFEO0FBQ3JELDZDQUErRDtBQUUvRCxNQUFxQixZQUFhLFNBQVEscUNBQXFCO0lBRTNELE1BQU07UUFFSCxJQUFJLENBQUMsWUFBWSxFQUFFLENBQUM7SUFDdkIsQ0FBQztJQUVELFlBQVk7UUFFVCxJQUFHLG1CQUFLLENBQUMsa0JBQWtCLENBQUMsQ0FBQyxDQUFDLEVBQzlCO1lBQ0ksSUFBSSxHQUFHLEdBQUcsb0JBQU0sQ0FBQyxJQUFJLENBQUMsZ0JBQWdCLENBQUMsbUJBQUssQ0FBQyxhQUFhLENBQUMsQ0FBQztZQUU1RCxzRkFBc0Y7WUFDdEYsdUZBQXVGO1lBQ3ZGLElBQUksR0FBRyxHQUFHLElBQUksRUFBYyxDQUFDO1lBRTdCLElBQUcscUJBQU8sQ0FBQyxPQUFPLENBQUMsR0FBRyxFQUFFLEdBQUcsRUFBRSxJQUFJLENBQUMsRUFDbEM7Z0JBQ0kscUZBQXFGO2dCQUNyRixJQUFJLE9BQU8sR0FBRyxNQUFNLENBQUMsR0FBRyxDQUFDLENBQUM7Z0JBRTFCLE9BQU8sQ0FBQyxHQUFHLENBQUMsYUFBYSxDQUFDLENBQUM7Z0JBQzNCLE9BQU8sQ0FBQyxHQUFHLENBQUMsMkJBQTJCLE9BQU8sQ0FBQyxRQUFRLENBQUMsSUFBSSxFQUFFLENBQUMsQ0FBQzthQUVuRTtpQkFBTTtnQkFDSCxPQUFPLENBQUMsR0FBRyxDQUFDLDRCQUE0QixDQUFDLENBQUM7YUFDN0M7U0FDSjtJQUNKLENBQUM7Q0FrQko7QUEvQ0QsK0JBK0NDIn0=\",\"assetPath\":\"Assets/Test
+    Script/LayerExample.ts\",\"manifest\":{\"properties\":[],\"name\":\"LayerExample\",\"description\":\"\"},\"isCompiled\":true}"
+  typescriptHash: b922f772266d1716df1cadbf2c83db97
+  onlyWriteTrigger: 0

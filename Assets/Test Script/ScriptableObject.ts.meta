@@ -1,0 +1,41 @@
+fileFormatVersion: 2
+guid: 7699a78113db3c14ea455e428df8832d
+importerOverride: ZEPETO.Script.Compiler:ZEPETO.Script:TypescriptAssetImporter
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: -1123457745, guid: 54cf806323ffe4418a4ce4cc63fe6b9d, type: 3}
+  isAssemblyDeclarations: 0
+  assembly: 
+  generateAllTypes: 1
+  types: []
+  generateWrapper: 0
+  overrideWrapperTypes: 0
+  wrapperTypes: []
+  WrapperFilters: []
+  wrapperOutputDirectory: Generated
+  compiledResult: '{"source":"\"use strict\";\r\nObject.defineProperty(exports, \"__esModule\",
+    { value: true });\r\nconst ZEPETO_Script_1 = require(\"ZEPETO.Script\");\r\nclass
+    ScriptableObject extends ZEPETO_Script_1.ZepetoScriptBehaviour {\r\n    Awake()
+    {\r\n        // direct access by name\r\n        console.log(`play name : ${this.player.get_Item(\"name\")}`);\r\n       
+    console.log(`play hp : ${this.player.get_Item(\"hp\")}`);\r\n        console.log(`play
+    position : \n(${this.player.get_Item(\"position\").x},${this.player.get_Item(\"position\").y},${this.player.get_Item(\"position\").z})`);\r\n       
+    console.log(`play rotation : \n(${this.player.get_Item(\"rotation\").x},${this.player.get_Item(\"rotation\").y},${this.player.get_Item(\"rotation\").z})`);\r\n       
+    // generic data call\r\n        let monsterState = this.enemy.targetObject;\r\n       
+    console.log(`enemy name :  ${monsterState.name}`);\r\n        console.log(`enemy
+    hp :  ${monsterState.hp}`);\r\n        console.log(`enemy position : (${monsterState.position.x},
+    ${monsterState.position.y}, \n${monsterState.position.z})`);\r\n        console.log(`enemy
+    rotation : (${monsterState.rotation.x}, ${monsterState.rotation.y}, \n${monsterState.rotation.z})`);\r\n       
+    // type casting\r\n        let playerPosition = this.player.get_Item(\"position\");\r\n       
+    console.log(`player position : (x:${playerPosition.x}, y:${playerPosition.y},
+    \nz:${playerPosition.z})`);\r\n        // generic type can access class member\r\n       
+    console.log(`enemy position : (x:${monsterState.position.x}, \ny:${monsterState.position.y},
+    z:${monsterState.position.z})`);\r\n    }\r\n}\r\nexports.default = ScriptableObject;\r\n//#
+    sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiU2NyaXB0YWJsZU9iamVjdC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIlNjcmlwdGFibGVPYmplY3QudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFDQSxpREFBNkU7QUFLN0UsTUFBcUIsZ0JBQWlCLFNBQVEscUNBQXFCO0lBTWhFLEtBQUs7UUFFRCx3QkFBd0I7UUFDeEIsT0FBTyxDQUFDLEdBQUcsQ0FBQyxlQUFlLElBQUksQ0FBQyxNQUFNLFVBQUMsTUFBTSxDQUFDLEVBQUUsQ0FBQyxDQUFDO1FBQ2xELE9BQU8sQ0FBQyxHQUFHLENBQUMsYUFBYSxJQUFJLENBQUMsTUFBTSxVQUFDLElBQUksQ0FBQyxFQUFFLENBQUMsQ0FBQztRQUM5QyxPQUFPLENBQUMsR0FBRyxDQUFDO0dBQ2hCLElBQUksQ0FBQyxNQUFNLFVBQUMsVUFBVSxFQUFFLENBQUMsSUFBSSxJQUFJLENBQUMsTUFBTSxVQUFDLFVBQVUsRUFBRSxDQUFDLElBQUksSUFBSSxDQUFDLE1BQU0sVUFBQyxVQUFVLEVBQUUsQ0FBQyxHQUFHLENBQUMsQ0FBQztRQUNwRixPQUFPLENBQUMsR0FBRyxDQUFDO0dBQ2hCLElBQUksQ0FBQyxNQUFNLFVBQUMsVUFBVSxFQUFFLENBQUMsSUFBSSxJQUFJLENBQUMsTUFBTSxVQUFDLFVBQVUsRUFBRSxDQUFDLElBQUksSUFBSSxDQUFDLE1BQU0sVUFBQyxVQUFVLEVBQUUsQ0FBQyxHQUFHLENBQUMsQ0FBQztRQUVwRixvQkFBb0I7UUFDcEIsSUFBSSxZQUFZLEdBQUcsSUFBSSxDQUFDLEtBQUssQ0FBQyxZQUFZLENBQUM7UUFDM0MsT0FBTyxDQUFDLEdBQUcsQ0FBQyxpQkFBaUIsWUFBWSxDQUFDLElBQUksRUFBRSxDQUFDLENBQUM7UUFDbEQsT0FBTyxDQUFDLEdBQUcsQ0FBQyxlQUFlLFlBQVksQ0FBQyxFQUFFLEVBQUUsQ0FBQyxDQUFDO1FBQzlDLE9BQU8sQ0FBQyxHQUFHLENBQUMscUJBQXFCLFlBQVksQ0FBQyxRQUFRLENBQUMsQ0FBQyxLQUFLLFlBQVksQ0FBQyxRQUFRLENBQUMsQ0FBQztFQUN6RixZQUFZLENBQUMsUUFBUSxDQUFDLENBQUMsR0FBRyxDQUFDLENBQUM7UUFDdkIsT0FBTyxDQUFDLEdBQUcsQ0FBQyxxQkFBcUIsWUFBWSxDQUFDLFFBQVEsQ0FBQyxDQUFDLEtBQUssWUFBWSxDQUFDLFFBQVEsQ0FBQyxDQUFDO0VBQ3pGLFlBQVksQ0FBQyxRQUFRLENBQUMsQ0FBQyxHQUFHLENBQUMsQ0FBQztRQUV2QixlQUFlO1FBQ2YsSUFBSSxjQUFjLEdBQUcsSUFBSSxDQUFDLE1BQU0sVUFBQyxVQUFVLENBQVksQ0FBQztRQUN4RCxPQUFPLENBQUMsR0FBRyxDQUFDLHdCQUF3QixjQUFjLENBQUMsQ0FBQyxPQUFPLGNBQWMsQ0FBQyxDQUFDO0lBQzlFLGNBQWMsQ0FBQyxDQUFDLEdBQUcsQ0FBQyxDQUFDO1FBRWxCLHVDQUF1QztRQUN2QyxPQUFPLENBQUMsR0FBRyxDQUFDLHVCQUF1QixZQUFZLENBQUMsUUFBUSxDQUFDLENBQUM7SUFDN0QsWUFBWSxDQUFDLFFBQVEsQ0FBQyxDQUFDLE9BQU8sWUFBWSxDQUFDLFFBQVEsQ0FBQyxDQUFDLEdBQUcsQ0FBQyxDQUFDO0lBRTNELENBQUM7Q0FFSDtBQXBDRCxtQ0FvQ0MifQ==","assetPath":"Assets/Test
+    Script/ScriptableObject.ts","manifest":{"properties":[{"assembly":"ZEPETO.Script","name":"player","type":"ZEPETO.Script.ZepetoScriptableObject","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]},{"assembly":"ZEPETO.Script","name":"enemy","type":"ZEPETO.Script.ZepetoScriptableObject","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]}],"name":"ScriptableObject","description":""},"isCompiled":true}'
+  typescriptHash: cbd109850e67db4626f899188d8f64f5
+  onlyWriteTrigger: 0

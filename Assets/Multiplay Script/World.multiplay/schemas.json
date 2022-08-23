@@ -1,0 +1,9 @@
+{
+"State" : {"players" : {"map" : "Player"},"actions" : {"map" : "Action"},"jumpTriggers" : {"map" : "Trigger"},"landingPoints" : {"map" : "LandingPoint"}},
+"Vector3" : {"x" : "number","y" : "number","z" : "number"},
+"Transform" : {"position" : "Vector3","rotation" : "Vector3"},
+"Player" : {"sessionId" : "string","zepetoHash" : "string","zepetoUserId" : "string","transform" : "Transform","state" : "number","subState" : "number","expectedState" : "number"},
+"Action" : {"jumpTrigger" : "boolean"},
+"Trigger" : {"trigger" : "boolean"},
+"LandingPoint" : {"transform" : "Transform"}
+}

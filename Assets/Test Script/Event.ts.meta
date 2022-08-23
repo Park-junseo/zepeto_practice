@@ -1,0 +1,42 @@
+fileFormatVersion: 2
+guid: d8c63b740078bc143b5d5595fad48d14
+importerOverride: ZEPETO.Script.Compiler:ZEPETO.Script:TypescriptAssetImporter
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: -1123457745, guid: 54cf806323ffe4418a4ce4cc63fe6b9d, type: 3}
+  isAssemblyDeclarations: 0
+  assembly: 
+  generateAllTypes: 1
+  types: []
+  generateWrapper: 0
+  overrideWrapperTypes: 0
+  wrapperTypes: []
+  WrapperFilters: []
+  wrapperOutputDirectory: Generated
+  compiledResult: '{"source":"\"use strict\";\r\n/*\r\nimport { ZepetoScriptBehaviour
+    } from ''ZEPETO.Script''\r\nimport { UnityEvent$1 } from \"UnityEngine.Events\";\r\nimport
+    { Input } from \"UnityEngine\";\r\n \r\nexport default class Event extends ZepetoScriptBehaviour
+    {\r\n   private mEventInt:UnityEvent$1<int>;\r\n   private countNum:number;\r\n
+    \r\n   Start() {\r\n       this.mEventInt = new UnityEvent$1<int>();\r\n      
+    this.mEventInt.AddListener((num)=>this.Count(num));\r\n       this.countNum =
+    0;\r\n   }\r\n \r\n   Update() {\r\n       if (Input.anyKeyDown &&this.mEventInt
+    != null) {\r\n          this.mEventInt.Invoke(this.countNum);\r\n \r\n         
+    ++this.countNum;\r\n          if(this.countNum > 100)\r\n              this.countNum
+    = 0;\r\n       }\r\n   }\r\n \r\n   Count(num){\r\n        console.log(`Count
+    : ${num}`);\r\n   }\r\n}\r\n*/\r\nObject.defineProperty(exports, \"__esModule\",
+    { value: true });\r\nconst ZEPETO_Script_1 = require(\"ZEPETO.Script\");\r\nconst
+    UnityEngine_Events_1 = require(\"UnityEngine.Events\");\r\nconst UnityEngine_1
+    = require(\"UnityEngine\");\r\nclass Event extends ZEPETO_Script_1.ZepetoScriptBehaviour
+    {\r\n    Start() {\r\n        this.mEvent = new UnityEngine_Events_1.UnityEvent();\r\n       
+    this.mEvent.AddListener(() => this.Ping());\r\n    }\r\n    Update() {\r\n       
+    if (UnityEngine_1.Input.anyKeyDown && this.mEvent != null) {\r\n            this.mEvent.Invoke();\r\n       
+    }\r\n    }\r\n    Ping() {\r\n        console.log(''Ping'');\r\n    }\r\n}\r\nexports.default
+    = Event;\r\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiRXZlbnQuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJFdmVudC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0VBNkJFOztBQUVGLGlEQUFxRDtBQUNyRCwyREFBZ0Q7QUFDaEQsNkNBQW9DO0FBRXBDLE1BQXFCLEtBQU0sU0FBUSxxQ0FBcUI7SUFHckQsS0FBSztRQUNELElBQUksQ0FBQyxNQUFNLEdBQUcsSUFBSSwrQkFBVSxFQUFFLENBQUM7UUFDL0IsSUFBSSxDQUFDLE1BQU0sQ0FBQyxXQUFXLENBQUUsR0FBRSxFQUFFLENBQUMsSUFBSSxDQUFDLElBQUksRUFBRSxDQUFFLENBQUM7SUFDaEQsQ0FBQztJQUVELE1BQU07UUFDRixJQUFHLG1CQUFLLENBQUMsVUFBVSxJQUFJLElBQUksQ0FBQyxNQUFNLElBQUksSUFBSSxFQUFFO1lBQ3hDLElBQUksQ0FBQyxNQUFNLENBQUMsTUFBTSxFQUFFLENBQUM7U0FDeEI7SUFDTCxDQUFDO0lBRUQsSUFBSTtRQUNBLE9BQU8sQ0FBQyxHQUFHLENBQUMsTUFBTSxDQUFDLENBQUM7SUFDeEIsQ0FBQztDQUNIO0FBakJELHdCQWlCQyJ9","assetPath":"Assets/Test
+    Script/Event.ts","manifest":{"properties":[],"name":"Event","description":""},"isCompiled":true}'
+  typescriptHash: 19ccefa28ef2040d926a227ae5baa505
+  onlyWriteTrigger: 0
