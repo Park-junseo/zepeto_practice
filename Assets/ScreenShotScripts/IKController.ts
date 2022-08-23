@@ -1,5 +1,6 @@
 import { ZepetoScriptBehaviour } from 'ZEPETO.Script'
 import { Transform, Animator, AvatarIKGoal, Quaternion , Vector3, HumanBodyBones } from 'UnityEngine'
+import { ZepetoCamera, ZepetoPlayers } from 'ZEPETO.Character.Controller';
 
 export default class IKController extends ZepetoScriptBehaviour {
 
@@ -20,9 +21,10 @@ export default class IKController extends ZepetoScriptBehaviour {
     private animator: Animator;
 
     private ikRotation: Quaternion;
+    private ikPosition: Vector3;
 
     private rightAramBones = [
-        HumanBodyBones.RightHand,
+        //HumanBodyBones.RightHand,
         HumanBodyBones.RightLowerArm,
         HumanBodyBones.RightUpperArm,
         //HumanBodyBones.RightShoulder,
@@ -60,9 +62,13 @@ export default class IKController extends ZepetoScriptBehaviour {
             this.gripTarget == null)
             return;
 
-        this.rightAramBones.forEach((bones)=>{
-            this.animator.SetBoneLocalRotation(bones, this.ikRotation);
-        });
+        // this.rightAramBones.forEach((bones)=>{
+        //     this.animator.SetBoneLocalRotation(bones, this.ikRotation);
+        // });
+
+        // this.animator.SetBoneLocalRotation(HumanBodyBones.RightShoulder, Quaternion.Euler(new Vector3(174, -1, -85)));
+        // this.animator.SetBoneLocalRotation(HumanBodyBones.UpperChest, Quaternion.Euler(new Vector3(4, 5, 0)));
+        // this.animator.SetBoneLocalRotation(HumanBodyBones.Chest, Quaternion.Euler(new Vector3(3, 0, 0)));
 
         // Set the look weight when the body and head looks at the target. 
         this.animator.SetLookAtWeight(1, this.bodyWeight, this.headWeight);
@@ -78,12 +84,17 @@ export default class IKController extends ZepetoScriptBehaviour {
         // Set target weight for rightHand
         this.animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
         // Set the rightHand to Grip where it extends
-        this.animator.SetIKPosition(AvatarIKGoal.RightHand, this.gripTarget.position);
+        //this.animator.SetIKPosition(AvatarIKGoal.RightHand, this.gripTarget.position);
 
-        console.log(`[OnAnimatorIK] ${this.gripTarget.gameObject.name}/${this.lookAtTarget.gameObject.name}: ${this.gripTarget.position.ToString()}/${this.lookAtTarget.position.ToString()}`);
+        this.animator.SetIKPosition(AvatarIKGoal.RightHand, this.ikPosition);
+
+        //console.log(`[OnAnimatorIK] ${this.gripTarget.gameObject.name}/${this.lookAtTarget.gameObject.name}: ${this.gripTarget.position.ToString()}/${this.lookAtTarget.position.ToString()}`);
     }
 
     LateUpdate() {
         this.ikRotation = Quaternion.FromToRotation(this.bodySource.position, this.gripTarget.position);
+        this.ikPosition = ZepetoPlayers.instance.ZepetoCamera.cameraParent.transform.position;
+        console.log(this.ikPosition.ToString());
+        // this.animator.SetBoneLocalRotation(HumanBodyBones.Chest, Quaternion.Euler(new Vector3(3, 0, 0)));
     }
 }
