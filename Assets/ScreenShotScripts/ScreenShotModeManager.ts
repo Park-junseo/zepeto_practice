@@ -14,7 +14,7 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     private screenShot: ScreenShotController;
 
     public selfieCameraPrefab: GameObject;
-    private selfieCamera: Camera;
+    private selfieCamera: SelfieCamera;
     private zepetoCamera: Camera;
 
     public selfieStickPrefab: GameObject;
@@ -46,15 +46,14 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     // Proceed with the specified settings when entering screenshot mode. 
     public StartScreenShotMode() {
         // 1. IK Settings
-        this.selfieCamera = this.selfieCamera || GameObject.Instantiate<GameObject>(this.selfieCameraPrefab).GetComponent<Camera>();
+        this.selfieCamera = this.selfieCamera || GameObject.Instantiate<GameObject>(this.selfieCameraPrefab).GetComponent<SelfieCamera>();
+        this.selfieCamera.transform.parent = ZepetoPlayers.instance.ZepetoCamera.transform;
 
         let character = ZepetoPlayers.instance.LocalPlayer.zepetoPlayer.character;
-        let target = this.selfieCamera;
   
         // 2. SelfieCamera setting
-        let selfieCamera: SelfieCamera = target.GetComponent<SelfieCamera>();
         
-        let grip = selfieCamera.GetGripObject();
+        let grip = this.selfieCamera.GetGripObject();
         if(!this.iKController) {
             let playerAnimator = this.localPlayer.character.gameObject.GetComponentInChildren<Animator>();
             this.iKController = playerAnimator.gameObject.AddComponent<IKController>();
@@ -67,9 +66,9 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         // this.targetTransform = this.targetTransform || new GameObject("target").transform;
 
 
-        selfieCamera.InitSetting(character);
+        this.selfieCamera.InitSetting(character);
 
-        this.iKController.SetTargetAndGrip(target.transform, grip.transform, character.transform);
+        this.iKController.SetTargetAndGrip(this.selfieCamera.transform, grip.transform, character.transform);
 
         // 3. Fix the selfie stick on the character's right hand
         this.selfieStick = this.selfieStick || GameObject.Instantiate<GameObject>(this.selfieStickPrefab);
@@ -92,7 +91,8 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     public ExitScreenShotMode(isThirdPersonView: boolean) {
         if(this.selfieCamera != null) {
             //GameObject.Destroy(this.selfieCamera.gameObject);
-            this.selfieCamera.gameObject.SetActive(false);
+            // this.selfieCamera.gameObject.SetActive(false);
+            this.selfieCamera.SetActiveCam(false);
         }
 
         // Delete the selfie camera
@@ -113,7 +113,7 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     }
     // Return Selfie Camera
     public GetSelfieCamera(): Camera {
-        return this.selfieCamera;
+        return this.selfieCamera.GetCamera();
     }
     // Return ZEPETO Camera
     public GetZepetoCamera(): Camera {
@@ -122,7 +122,7 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
 
     // Decide whether to enable the selfie camera
     public SetSelfieCameraActive(active: boolean) {
-        this.selfieCamera.gameObject.SetActive(active);
+        this.selfieCamera.SetActiveCam(active);
     }
 
     // Decide whether to apply IKPass
@@ -141,7 +141,7 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         // Enabling IKPass for Selfie Pose Settings
         this.SetIKPassActive(true); 
         //Change the camera for screenshots to the selfie camera
-        this.screenShot.SetScreenShotCamera(this.selfieCamera);
+        this.screenShot.SetScreenShotCamera(this.selfieCamera.GetCamera());
         // Enable Selfie Stick
         this.selfieStick.SetActive(true);
     }

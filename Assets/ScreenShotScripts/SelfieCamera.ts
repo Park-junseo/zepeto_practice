@@ -1,5 +1,5 @@
 import { ZepetoScriptBehaviour } from 'ZEPETO.Script'
-import { Vector3, Transform, Mathf, Time, Quaternion, HideFlags, GameObject, Input, Application } from 'UnityEngine'
+import { Vector3, Transform, Mathf, Time, Quaternion, HideFlags, GameObject, Input, Application, Camera } from 'UnityEngine'
 import { EventSystem } from 'UnityEngine.EventSystems';
 import { Position } from 'UnityEngine.UIElements';
 import { CharacterMoveState, CharacterState, ZepetoCharacter, ZepetoPlayers } from 'ZEPETO.Character.Controller';
@@ -14,6 +14,8 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
     public yMinLimit: number = -20;
     public yMaxLimit: number = 40;
     public smoothCameraRotation: number = 10;
+
+    public fixBodyRotation: Vector3 = new Vector3(0,0,0);
 
     public grip: GameObject;
     private currentTarget: Transform;
@@ -30,6 +32,9 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
 
     private zepetoCharacter:ZepetoCharacter;
     private initialRunSpeed:number;
+
+    private camera: Camera;
+    private isActive: boolean = false;
 
     public GetGripObject() :GameObject {
         return this.grip;
@@ -93,7 +98,7 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
         var lookAxisRot = Quaternion.LookRotation(subtractionVec*-1);
         var projRot = Vector3.ProjectOnPlane(lookAxisRot.eulerAngles, Vector3.right);
 
-        this.currentTarget.rotation = Quaternion.Euler(projRot);
+        this.currentTarget.rotation = Quaternion.Euler(projRot + this.fixBodyRotation);
 
         //console.log(`[SelfieCamera] ${this.currentTarget.rotation.eulerAngles.ToString()}`)
 
@@ -160,44 +165,16 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
             this.zepetoCharacter.SyncStateAnimation();
     }
 
-    OnEnable() {
-        if(this.currentTarget) {
-            this.targetLookAt = this.targetLookAt || new GameObject("targetLookAt").transform;
+    Awake() {
+        this.camera = this.GetComponent<Camera>();
+    }
 
-            this.targetLookAt.position = this.currentTarget.position;
-            this.targetLookAt.hideFlags = HideFlags.HideInHierarchy;
-            this.targetLookAt.rotation = this.currentTarget.rotation;
-
-            //const inverse = this.currentTarget.forward;
-            //const inverse = Quaternion.Inverse(this.currentTarget.rotation).eulerAngles;
-            // const inverse = Quaternion.Euler(this.currentTarget.eulerAngles * -1).eulerAngles;
-
-            // this.rotateX = this.currentTarget.rotation.eulerAngles.x;
-            // this.rotateY = this.currentTarget.rotation.eulerAngles.y;
-            // this.rotateX = this.currentTarget.rotation.eulerAngles.x;
-            // this.rotateY = this.currentTarget.rotation.eulerAngles.y;
-
-            //const inverse = Quaternion.Inverse(this.currentTarget.rotation).eulerAngles;
-
-            // this.rotateY = this.currentTarget.eulerAngles.x;
-            // this.rotateX = this.currentTarget.eulerAngles.y;
-
-            this.rotateY = this.currentTarget.eulerAngles.x;
-            this.rotateX = this.currentTarget.eulerAngles.y - 180;
-
-            this.initialRunSpeed = ZepetoPlayers.instance.characterData.runSpeed;
-            ZepetoPlayers.instance.characterData.runSpeed = 2;
-            
-        }
-        this.StartCoroutine(this.UpdateBeforeIK());
+    OnEnable() {        
 
     }
 
     OnDisable() {
-        this.StopAllCoroutines();
 
-        this.zepetoCharacter.SyncStateAnimation();
-        ZepetoPlayers.instance.characterData.runSpeed = this.initialRunSpeed;
     }
     // LateUpdate() {
 
@@ -214,12 +191,62 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
             if (this.currentTarget == null || this.targetLookAt == null)
             return;
 
+            console.log('[ddddddddddddddddddddddddddd]');
             this.CameraInput();
             this.CameraMovement();
             this.SettingZepetoPlayer();
             
             yield null;
         }
+    }
+
+    public SetActiveCam(active:boolean) {
+        if(this.isActive === active) return;
+
+        this.isActive = active;
+        this.gameObject.SetActive(active);
+        if(active) {
+            if(this.currentTarget) {
+                this.targetLookAt = this.targetLookAt || new GameObject("targetLookAt").transform;
+    
+                this.targetLookAt.position = this.currentTarget.position;
+                this.targetLookAt.hideFlags = HideFlags.HideInHierarchy;
+    
+                this.rotateY = 15;
+                this.rotateX = this.currentTarget.eulerAngles.y - 180;
+    
+                this.targetLookAt.rotation = Quaternion.Euler(this.rotateY, this.rotateX, 0);//this.currentTarget.rotation;
+    
+                //const inverse = this.currentTarget.forward;
+                //const inverse = Quaternion.Inverse(this.currentTarget.rotation).eulerAngles;
+                // const inverse = Quaternion.Euler(this.currentTarget.eulerAngles * -1).eulerAngles;
+    
+                // this.rotateX = this.currentTarget.rotation.eulerAngles.x;
+                // this.rotateY = this.currentTarget.rotation.eulerAngles.y;
+                // this.rotateX = this.currentTarget.rotation.eulerAngles.x;
+                // this.rotateY = this.currentTarget.rotation.eulerAngles.y;
+    
+                //const inverse = Quaternion.Inverse(this.currentTarget.rotation).eulerAngles;
+    
+                // this.rotateY = this.currentTarget.eulerAngles.x;
+                // this.rotateX = this.currentTarget.eulerAngles.y;
+    
+                this.initialRunSpeed = ZepetoPlayers.instance.characterData.runSpeed;
+                ZepetoPlayers.instance.characterData.runSpeed = 2;
+                
+                this.StartCoroutine(this.UpdateBeforeIK());
+            }
+        } else {
+            this.StopAllCoroutines();
+
+            this.zepetoCharacter.SyncStateAnimation();
+            ZepetoPlayers.instance.characterData.runSpeed = this.initialRunSpeed;
+            this.currentTarget.rotation = Quaternion.Euler(this.currentTarget.eulerAngles - this.fixBodyRotation);
+        }
+    }
+
+    public GetCamera() {
+        return this.camera;
     }
 
     // Update() {
