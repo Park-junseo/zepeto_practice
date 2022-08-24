@@ -3,6 +3,7 @@ import { Vector3, Transform, Mathf, Time, Quaternion, HideFlags, GameObject, Inp
 import { EventSystem } from 'UnityEngine.EventSystems';
 import { Position } from 'UnityEngine.UIElements';
 import { ZepetoPlayers } from 'ZEPETO.Character.Controller';
+import { TransformAccess } from 'UnityEngine.Jobs';
 export default class SelfieCamera extends ZepetoScriptBehaviour {
     
     public rightOffset: number = 0.25;
@@ -23,6 +24,9 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
     private xMaxLimit: number = 180;
     private rotateX: number = 0;
     private rotateY: number = 0;
+
+    private worldCamaraParent: Transform;
+    private worldCameralookAxias: Quaternion;
 
     public GetGripObject() :GameObject {
         return this.grip;
@@ -88,9 +92,11 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
 
         this.currentTarget.rotation = Quaternion.Euler(projRot);
 
+        //console.log(`[SelfieCamera] ${this.currentTarget.rotation.eulerAngles.ToString()}`)
+
         var lookAxisRot = Quaternion.LookRotation(subtractionVec);
 
-        ZepetoPlayers.instance.ZepetoCamera.cameraParent.rotation = lookAxisRot;
+        this.worldCameralookAxias = lookAxisRot;
         //ZepetoPlayers.instance.ZepetoCamera.rotation.eulerAngles = (subtractionVec);
 
 
@@ -101,6 +107,8 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
         this.currentTarget = target;
 
         this.currentTargetPos = new Vector3(this.currentTarget.position.x, this.currentTarget.position.y, this.currentTarget.position.z);
+
+        this.worldCamaraParent = ZepetoPlayers.instance.ZepetoCamera.cameraParent;
 
         // if (this.targetLookAt != null) {
 
@@ -140,6 +148,11 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
         this.RotateCamera(X, Y);
     }
 
+    private worldCameraSetting () {
+        if(this.worldCameralookAxias)
+            this.worldCamaraParent.rotation = this.worldCameralookAxias;
+    }
+
     OnEnable() {
         if(this.currentTarget) {
             this.targetLookAt = this.targetLookAt || new GameObject("targetLookAt").transform;
@@ -175,5 +188,13 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
 
         this.CameraInput();
         this.CameraMovement();
+    }
+
+    Update() {
+        if (this.currentTarget == null || this.targetLookAt == null)
+            return;
+        this.worldCameraSetting();
+
+
     }
 }

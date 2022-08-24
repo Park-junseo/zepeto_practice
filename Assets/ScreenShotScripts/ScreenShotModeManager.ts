@@ -20,6 +20,9 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     public selfieStickPrefab: GameObject;
     private selfieStick: GameObject;
 
+    // private lookAtTransform: Transform;
+    // private targetTransform: Transform;
+
     // Data
     private playerLayer: number = 21;
     private rightHandBone :string = "hand_R";
@@ -50,13 +53,22 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
   
         // 2. SelfieCamera setting
         let selfieCamera: SelfieCamera = target.GetComponent<SelfieCamera>();
-        selfieCamera.InitSetting(character.gameObject.transform);
         
         let grip = selfieCamera.GetGripObject();
         if(!this.iKController) {
             let playerAnimator = this.localPlayer.character.gameObject.GetComponentInChildren<Animator>();
             this.iKController = playerAnimator.gameObject.AddComponent<IKController>();
         }
+
+        // this.lookAtTransform = this.lookAtTransform || new GameObject("selfieLookAt").transform;
+        // this.lookAtTransform.SetPositionAndRotation(this.selfieCamera.transform.position, this.selfieCamera.transform.rotation);
+        // this.lookAtTransform.parent = character.transform;
+
+        // this.targetTransform = this.targetTransform || new GameObject("target").transform;
+
+
+        selfieCamera.InitSetting(character.gameObject.transform);
+
         this.iKController.SetTargetAndGrip(target.transform, grip.transform, character.transform);
 
         // 3. Fix the selfie stick on the character's right hand
