@@ -22,6 +22,8 @@ type Counter = {
 
 export default class ClientStarterV2 extends ZepetoScriptBehaviour {
 
+    private static Instance: ClientStarterV2;
+
     public multiplay: ZepetoWorldMultiplay;
 
     public debugText: Text;
@@ -73,7 +75,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
 
         this.StartCoroutine(this.SendMessageLoop(0.04));
         this.StartCoroutine(this.CheckValidControl(1.0));
-
+        this.StartCoroutine(this.FixRotation());
     }
 
     // Send the local character transform to the server at the scheduled Interval Time.
@@ -293,6 +295,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
 
 
             zepetoPlayer.character.MoveContinuously(moveDir);
+            
         }
 
         if(prevPlayerState) {
@@ -463,12 +466,35 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         );
     }
 
+    private* FixRotation () {
+        while(true) {
+            this.currentPlayers.forEach((value: Player,sessionId: string) => {
+                if(this.room.SessionId !== sessionId && ZepetoPlayers.instance.HasPlayer(sessionId)) {
+                    const player = ZepetoPlayers.instance.GetPlayer(sessionId);
+                    player.character.transform.rotation = UnityEngine.Quaternion.Euler(UnityEngine.Vector3.zero);
+                    console.log(`[FixRotation] ${sessionId}: ${player.character.transform.rotation.ToString()}`);
+                }
+            });
+            yield null;
+        }
+    }
+
     /*-------------------public---------------------*/
+    public static GetInstance(): ClientStarterV2 {
+        if(!ClientStarterV2.Instance) {
+
+            var _obj = new UnityEngine.GameObject("ClientStarter");
+            UnityEngine.GameObject.DontDestroyOnLoad(_obj);
+            ClientStarterV2.Instance = _obj.AddComponent<ClientStarterV2>();
+        }
+
+        return ClientStarterV2.Instance;
+    }
+    
     public SendPlayerJump(state: CharacterState) {
         if(!this.unableJumpStates.includes(state)) {
             this.room.Send("onPlayerJump");
             console.log("[SendPlayerJump] jump!")
         }
     }
-
 }

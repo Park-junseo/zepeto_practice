@@ -1,8 +1,9 @@
 import { ZepetoScriptBehaviour } from 'ZEPETO.Script'
-import { Vector3, Transform, Mathf, Time, Quaternion, HideFlags, GameObject, Input, Application } from 'UnityEngine'
+import { Vector3, Transform, Mathf, Time, Quaternion, HideFlags, GameObject, Input, Application, Camera } from 'UnityEngine'
 import { EventSystem } from 'UnityEngine.EventSystems';
 import { Position } from 'UnityEngine.UIElements';
-import { ZepetoPlayers } from 'ZEPETO.Character.Controller';
+import { CharacterMoveState, CharacterState, ZepetoCharacter, ZepetoPlayers } from 'ZEPETO.Character.Controller';
+import { TransformAccess } from 'UnityEngine.Jobs';
 export default class SelfieCamera extends ZepetoScriptBehaviour {
     
     public rightOffset: number = 0.25;
@@ -14,6 +15,8 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
     public yMaxLimit: number = 40;
     public smoothCameraRotation: number = 10;
 
+    public fixBodyRotation: Vector3 = new Vector3(0,0,0);
+
     public grip: GameObject;
     private currentTarget: Transform;
     private targetLookAt: Transform;
@@ -23,6 +26,15 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
     private xMaxLimit: number = 180;
     private rotateX: number = 0;
     private rotateY: number = 0;
+
+    private worldCamaraParent: Transform;
+    private worldCameralookAxias: Quaternion;
+
+    private zepetoCharacter:ZepetoCharacter;
+    private initialRunSpeed:number;
+
+    private camera: Camera;
+    private isActive: boolean = false;
 
     public GetGripObject() :GameObject {
         return this.grip;
@@ -86,21 +98,26 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
         var lookAxisRot = Quaternion.LookRotation(subtractionVec*-1);
         var projRot = Vector3.ProjectOnPlane(lookAxisRot.eulerAngles, Vector3.right);
 
-        this.currentTarget.rotation = Quaternion.Euler(projRot);
+        this.currentTarget.rotation = Quaternion.Euler(projRot + this.fixBodyRotation);
+
+        //console.log(`[SelfieCamera] ${this.currentTarget.rotation.eulerAngles.ToString()}`)
 
         var lookAxisRot = Quaternion.LookRotation(subtractionVec);
 
-        ZepetoPlayers.instance.ZepetoCamera.cameraParent.rotation = lookAxisRot;
+        this.worldCamaraParent.rotation = lookAxisRot;
         //ZepetoPlayers.instance.ZepetoCamera.rotation.eulerAngles = (subtractionVec);
 
 
 
     }
 
-    public InitSetting(target: Transform) { // 플레이어 transfrom
-        this.currentTarget = target;
+    public InitSetting(player: ZepetoCharacter) { // 플레이어 transfrom
+        this.zepetoCharacter = player;
+        this.currentTarget = player.transform;
 
         this.currentTargetPos = new Vector3(this.currentTarget.position.x, this.currentTarget.position.y, this.currentTarget.position.z);
+
+        this.worldCamaraParent = ZepetoPlayers.instance.ZepetoCamera.cameraParent;
 
         // if (this.targetLookAt != null) {
 
@@ -123,7 +140,7 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
             return;
         }
 
-        if (EventSystem.current.IsPointerOverGameObject())
+        if (EventSystem.current.IsPointerOverGameObject()) 
             return;
 
         let X: number = 0;
@@ -140,39 +157,103 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
         this.RotateCamera(X, Y);
     }
 
-    OnEnable() {
-        if(this.currentTarget) {
-            this.targetLookAt = this.targetLookAt || new GameObject("targetLookAt").transform;
-
-            this.targetLookAt.position = this.currentTarget.position;
-            this.targetLookAt.hideFlags = HideFlags.HideInHierarchy;
-            this.targetLookAt.rotation = this.currentTarget.rotation;
-
-            //const inverse = this.currentTarget.forward;
-            //const inverse = Quaternion.Inverse(this.currentTarget.rotation).eulerAngles;
-            // const inverse = Quaternion.Euler(this.currentTarget.eulerAngles * -1).eulerAngles;
-
-            // this.rotateX = this.currentTarget.rotation.eulerAngles.x;
-            // this.rotateY = this.currentTarget.rotation.eulerAngles.y;
-            // this.rotateX = this.currentTarget.rotation.eulerAngles.x;
-            // this.rotateY = this.currentTarget.rotation.eulerAngles.y;
-
-            const inverse = Quaternion.Inverse(this.currentTarget.rotation).eulerAngles;
-
-            // this.rotateY = this.currentTarget.eulerAngles.x;
-            // this.rotateX = this.currentTarget.eulerAngles.y;
-            this.rotateY = inverse.x;
-            this.rotateX = inverse.y;
-            console.log(`[onEnable] ${this.rotateY}`);
-            
-        }
+    private SettingZepetoPlayer () {
+        if(this.zepetoCharacter.CurrentState === CharacterState.Move && 
+            this.zepetoCharacter.MotionV2.CurrentMoveState === CharacterMoveState.MoveRun)
+            this.zepetoCharacter.ChangeStateAnimation(CharacterState.Move, CharacterMoveState.MoveWalk);
+        else
+            this.zepetoCharacter.SyncStateAnimation();
     }
-    LateUpdate() {
 
-        if (this.currentTarget == null || this.targetLookAt == null)
+    Awake() {
+        this.camera = this.GetComponent<Camera>();
+    }
+
+    OnEnable() {        
+
+    }
+
+    OnDisable() {
+
+    }
+    // LateUpdate() {
+
+    //     if (this.currentTarget == null || this.targetLookAt == null)
+    //         return;
+
+    //     this.CameraInput();
+    //     this.CameraMovement();
+    //     this.worldCameraSetting();
+    // }
+
+    private* UpdateBeforeIK() {
+        while(true) {
+            if (this.currentTarget == null || this.targetLookAt == null)
             return;
 
-        this.CameraInput();
-        this.CameraMovement();
+            console.log('[ddddddddddddddddddddddddddd]');
+            this.CameraInput();
+            this.CameraMovement();
+            this.SettingZepetoPlayer();
+            
+            yield null;
+        }
     }
+
+    public SetActiveCam(active:boolean) {
+        if(this.isActive === active) return;
+
+        this.isActive = active;
+        this.gameObject.SetActive(active);
+        if(active) {
+            if(this.currentTarget) {
+                this.targetLookAt = this.targetLookAt || new GameObject("targetLookAt").transform;
+    
+                this.targetLookAt.position = this.currentTarget.position;
+                this.targetLookAt.hideFlags = HideFlags.HideInHierarchy;
+    
+                this.rotateY = 15;
+                this.rotateX = this.currentTarget.eulerAngles.y - 180;
+    
+                this.targetLookAt.rotation = Quaternion.Euler(this.rotateY, this.rotateX, 0);//this.currentTarget.rotation;
+    
+                //const inverse = this.currentTarget.forward;
+                //const inverse = Quaternion.Inverse(this.currentTarget.rotation).eulerAngles;
+                // const inverse = Quaternion.Euler(this.currentTarget.eulerAngles * -1).eulerAngles;
+    
+                // this.rotateX = this.currentTarget.rotation.eulerAngles.x;
+                // this.rotateY = this.currentTarget.rotation.eulerAngles.y;
+                // this.rotateX = this.currentTarget.rotation.eulerAngles.x;
+                // this.rotateY = this.currentTarget.rotation.eulerAngles.y;
+    
+                //const inverse = Quaternion.Inverse(this.currentTarget.rotation).eulerAngles;
+    
+                // this.rotateY = this.currentTarget.eulerAngles.x;
+                // this.rotateX = this.currentTarget.eulerAngles.y;
+    
+                this.initialRunSpeed = ZepetoPlayers.instance.characterData.runSpeed;
+                ZepetoPlayers.instance.characterData.runSpeed = 2;
+                
+                this.StartCoroutine(this.UpdateBeforeIK());
+            }
+        } else {
+            this.StopAllCoroutines();
+
+            this.zepetoCharacter.SyncStateAnimation();
+            ZepetoPlayers.instance.characterData.runSpeed = this.initialRunSpeed;
+            this.currentTarget.rotation = Quaternion.Euler(this.currentTarget.eulerAngles - this.fixBodyRotation);
+        }
+    }
+
+    public GetCamera() {
+        return this.camera;
+    }
+
+    // Update() {
+    //     if (this.currentTarget == null || this.targetLookAt == null)
+    //         return;
+    //     this.worldCameraSetting();
+
+
+    // }
 }
