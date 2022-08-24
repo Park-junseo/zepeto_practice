@@ -74,16 +74,14 @@ export default class IKController extends ZepetoScriptBehaviour {
 
         // const look = ZepetoPlayers.instance.ZepetoCamera.cameraParent.position + forward*-3
 
-        const playerTransform = ZepetoPlayers.instance.LocalPlayer.zepetoPlayer.character.transform;
 
         // Set the look weight when the body and head looks at the target. 
         this.animator.SetLookAtWeight(1, this.bodyWeight, this.headWeight);
         // set lookAt target
-        // this.animator.SetLookAtPosition(this.lookAtTarget.position);
+        this.animator.SetLookAtPosition(this.lookAtTarget.position);
         // this.animator.SetLookAtPosition(look);
         //this.animator.SetLookAtPosition(ZepetoPlayers.instance.ZepetoCamera.cameraParent.position);
 
-        this.animator.SetLookAtPosition(playerTransform.position + playerTransform.forward*3);
 
         // console.log(`[IKController] ${ZepetoPlayers.instance.LocalPlayer.movingAxis.position.ToString()}`);
         // this.animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
@@ -97,9 +95,8 @@ export default class IKController extends ZepetoScriptBehaviour {
         // Set the rightHand to Grip where it extends
         //this.animator.SetIKPosition(AvatarIKGoal.RightHand, this.gripTarget.position);
 
-        // this.animator.SetIKPosition(AvatarIKGoal.RightHand, this.gripTarget.position);
+        this.animator.SetIKPosition(AvatarIKGoal.RightHand, this.gripTarget.position);
         // this.animator.SetIKPosition(AvatarIKGoal.RightHand, look+this.gripTarget.position);
-        this.animator.SetIKPosition(AvatarIKGoal.RightHand, playerTransform.position + playerTransform.right*3);
 
         //console.log(`[OnAnimatorIK] ${this.gripTarget.gameObject.name}/${this.lookAtTarget.gameObject.name}: ${this.gripTarget.position.ToString()}/${this.lookAtTarget.position.ToString()}`);
     }

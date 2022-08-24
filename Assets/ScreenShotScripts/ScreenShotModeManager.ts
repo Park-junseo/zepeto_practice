@@ -67,7 +67,7 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         // this.targetTransform = this.targetTransform || new GameObject("target").transform;
 
 
-        selfieCamera.InitSetting(character.gameObject.transform);
+        selfieCamera.InitSetting(character);
 
         this.iKController.SetTargetAndGrip(target.transform, grip.transform, character.transform);
 
