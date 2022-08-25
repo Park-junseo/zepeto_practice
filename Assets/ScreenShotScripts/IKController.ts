@@ -107,4 +107,17 @@ export default class IKController extends ZepetoScriptBehaviour {
         // console.log(this.ikPosition.ToString());
         // this.animator.SetBoneLocalRotation(HumanBodyBones.Chest, Quaternion.Euler(new Vector3(3, 0, 0)));
     }
+
+    public GetLookAtTransform() {return this.lookAtTarget; }
+    public GetTargetAtTransform() {return this.gripTarget; }
+
+    public GetBodyWeight() {return this.bodyWeight;}
+    public GetHeadWeight() {return this.headWeight;}
+
+    public GetLookAtAndTargetAt() {
+        return [
+            this.lookAtTarget.position,
+            this.gripTarget.position
+        ];
+    }
 }

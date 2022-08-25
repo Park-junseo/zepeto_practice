@@ -2,7 +2,7 @@ import { ZepetoScriptBehaviour } from 'ZEPETO.Script'
 import { Vector3, Transform, Mathf, Time, Quaternion, HideFlags, GameObject, Input, Application, Camera } from 'UnityEngine'
 import { EventSystem } from 'UnityEngine.EventSystems';
 import { Position } from 'UnityEngine.UIElements';
-import { CharacterMoveState, CharacterState, ZepetoCharacter, ZepetoPlayers } from 'ZEPETO.Character.Controller';
+import { CharacterJumpState, CharacterMoveState, CharacterState, PlayerControlMode, ZepetoCharacter, ZepetoPlayerControl, ZepetoPlayers } from 'ZEPETO.Character.Controller';
 import { TransformAccess } from 'UnityEngine.Jobs';
 export default class SelfieCamera extends ZepetoScriptBehaviour {
     
@@ -31,7 +31,10 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
     private worldCameralookAxias: Quaternion;
 
     private zepetoCharacter:ZepetoCharacter;
+    private initialWalkSpeed:number;
     private initialRunSpeed:number;
+    private initialRunThreshold:number;
+    private initialJumpDashSpeedThreshold:number;
 
     private camera: Camera;
     private isActive: boolean = false;
@@ -158,10 +161,12 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
     }
 
     private SettingZepetoPlayer () {
-        if(this.zepetoCharacter.CurrentState === CharacterState.Move && 
-            this.zepetoCharacter.MotionV2.CurrentMoveState === CharacterMoveState.MoveRun)
+        if(this.zepetoCharacter.CurrentState === CharacterState.Move)
             this.zepetoCharacter.ChangeStateAnimation(CharacterState.Move, CharacterMoveState.MoveWalk);
-        else
+        else if (this.zepetoCharacter.CurrentState === CharacterState.Jump && 
+        this.zepetoCharacter.MotionV2.CurrentJumpState !== CharacterJumpState.JumpIdle) {
+            this.zepetoCharacter.ChangeStateAnimation(CharacterState.Jump, CharacterJumpState.JumpMove);
+        } else
             this.zepetoCharacter.SyncStateAnimation();
     }
 
@@ -190,11 +195,9 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
         while(true) {
             if (this.currentTarget == null || this.targetLookAt == null)
             return;
-
-            console.log('[ddddddddddddddddddddddddddd]');
             this.CameraInput();
             this.CameraMovement();
-            this.SettingZepetoPlayer();
+            //this.SettingZepetoPlayer();
             
             yield null;
         }
@@ -231,8 +234,21 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
                 // this.rotateY = this.currentTarget.eulerAngles.x;
                 // this.rotateX = this.currentTarget.eulerAngles.y;
     
+                this.initialWalkSpeed = ZepetoPlayers.instance.characterData.walkSpeed;
                 this.initialRunSpeed = ZepetoPlayers.instance.characterData.runSpeed;
-                ZepetoPlayers.instance.characterData.runSpeed = 2;
+                this.initialRunThreshold = ZepetoPlayers.instance.motionV2Data.runThreshold;
+                this.initialJumpDashSpeedThreshold = ZepetoPlayers.instance.motionV2Data.jumpDashSpeedThreshold;
+                // ZepetoPlayers.instance.characterData.runSpeed = 2;
+                // ZepetoPlayers.instance.controllerData.controlMode = PlayerControlMode.WalkOnly;
+
+                //////////////////////////
+                // ZepetoPlayers.instance.motionV2Data.runThreshold = 10;
+                // ZepetoPlayers.instance.characterData.walkSpeed = 1;
+                // ZepetoPlayers.instance.characterData.runSpeed = ZepetoPlayers.instance.characterData.walkSpeed;
+                // ZepetoPlayers.instance.motionV2Data.jumpDashSpeedThreshold = 10//ZepetoPlayers.instance.characterData.walkSpeed;
+
+                ZepetoPlayers.instance.controllerData.controlMode = PlayerControlMode.WalkOnly;
+
                 
                 this.StartCoroutine(this.UpdateBeforeIK());
             }
@@ -240,9 +256,19 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
             this.StopAllCoroutines();
 
             this.zepetoCharacter.SyncStateAnimation();
-            ZepetoPlayers.instance.characterData.runSpeed = this.initialRunSpeed;
+            // ZepetoPlayers.instance.characterData.runSpeed = this.initialRunSpeed;
+            // ZepetoPlayers.instance.controllerData.controlMode = PlayerControlMode.Default;
+
+            // //////////////////////////////////
+            // ZepetoPlayers.instance.motionV2Data.runThreshold = this.initialRunThreshold;
+            // ZepetoPlayers.instance.characterData.walkSpeed = this.initialWalkSpeed;
+            // ZepetoPlayers.instance.characterData.runSpeed = this.initialRunSpeed;
+            // ZepetoPlayers.instance.motionV2Data.jumpDashSpeedThreshold = this.initialJumpDashSpeedThreshold;
+
             this.currentTarget.rotation = Quaternion.Euler(this.currentTarget.eulerAngles - this.fixBodyRotation);
         }
+
+        if(this.zepetoCharacter) this.zepetoCharacter.ZepetoAnimator.SetBool("SelfieMode", active);
     }
 
     public GetCamera() {

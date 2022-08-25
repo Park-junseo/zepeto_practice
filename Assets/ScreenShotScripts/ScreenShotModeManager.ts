@@ -7,6 +7,8 @@ import SelfieCamera from './SelfieCamera';
 
 export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     
+    private static Instance: ScreenShotModeManager;
+
     private localPlayer: ZepetoPlayer;
     private iKController: IKController;
 
@@ -17,6 +19,8 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     private selfieCamera: SelfieCamera;
     private zepetoCamera: Camera;
 
+    private _isActiveSelfie: boolean;
+
     public selfieStickPrefab: GameObject;
     private selfieStick: GameObject;
 
@@ -26,6 +30,10 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     // Data
     private playerLayer: number = 21;
     private rightHandBone :string = "hand_R";
+
+    Awake() {
+        ScreenShotModeManager.Instance = this;
+    }
 
     Start() {
         this.screenShot = this.screenShotController.GetComponent<ScreenShotController>();
@@ -144,6 +152,8 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         this.screenShot.SetScreenShotCamera(this.selfieCamera.GetCamera());
         // Enable Selfie Stick
         this.selfieStick.SetActive(true);
+
+        this._isActiveSelfie = true;
     }
 
     SetZepetoCameraMode() {
@@ -157,6 +167,8 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         this.screenShot.SetScreenShotCamera(this.zepetoCamera);
         // Disable the selfie stick
         this.selfieStick.SetActive(false);
+
+        this._isActiveSelfie = false;
     }
 
     private SetZepetoCameraActive(active:boolean) {
@@ -164,4 +176,19 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         //ZepetoPlayers.instance.ZepetoCamera.enabled = active;
         ZepetoPlayers.instance.ZepetoCamera.LockXAxis = !active;
     }
+
+    public static GetInstance(): ScreenShotModeManager {
+        if(!ScreenShotModeManager.Instance) {
+
+            var _obj = new GameObject("ClientStarter");
+            GameObject.DontDestroyOnLoad(_obj);
+            ScreenShotModeManager.Instance = _obj.AddComponent<ScreenShotModeManager>();
+        }
+
+        return ScreenShotModeManager.Instance;
+    }
+
+    public GetIKController() { return this.iKController; }
+
+    public get isActiveSelfie() { return this._isActiveSelfie; }
 }
