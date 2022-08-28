@@ -13,7 +13,7 @@ export default class IKController extends ZepetoScriptBehaviour {
 
     // Body and head weight setting for target
     // Controls how strongly the body reacts to the movement of the target
-    private bodyWeight: number = 0.7;
+    private bodyWeight: number = 0.3;
     private headWeight: number = 0.7; 
 
     //Whether or not to apply IK
