@@ -8,6 +8,7 @@ declare module "ZEPETO.Multiplay.Schema" {
 		actions: MapSchema<Action>;
 		jumpTriggers: MapSchema<Trigger>;
 		landingPoints: MapSchema<LandingPoint>;
+		selfieIKs: MapSchema<SelfieIK>;
 	}
 	class Vector3 extends Schema {
 		x: number;
@@ -35,5 +36,10 @@ declare module "ZEPETO.Multiplay.Schema" {
 	}
 	class LandingPoint extends Schema {
 		transform: Transform;
+	}
+	class SelfieIK extends Schema {
+		isSelfie: boolean;
+		lookAt: Vector3;
+		targetAt: Vector3;
 	}
 }

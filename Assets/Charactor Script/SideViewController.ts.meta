@@ -1,0 +1,70 @@
+fileFormatVersion: 2
+guid: b893924ff2f7523479e443dae10ba2a0
+importerOverride: ZEPETO.Script.Compiler:ZEPETO.Script:TypescriptAssetImporter
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: -1123457745, guid: 54cf806323ffe4418a4ce4cc63fe6b9d, type: 3}
+  isAssemblyDeclarations: 0
+  assembly: 
+  generateAllTypes: 1
+  types: []
+  generateWrapper: 0
+  overrideWrapperTypes: 0
+  wrapperTypes: []
+  WrapperFilters: []
+  wrapperOutputDirectory: Generated
+  compiledResult: '{"source":"\"use strict\";\r\nObject.defineProperty(exports, \"__esModule\",
+    { value: true });\r\nconst ZEPETO_Script_1 = require(\"ZEPETO.Script\");\r\nconst
+    UnityEngine_InputSystem_1 = require(\"UnityEngine.InputSystem\");\r\nconst ZEPETO_Character_Controller_1
+    = require(\"ZEPETO.Character.Controller\");\r\nconst UnityEngine_1 = require(\"UnityEngine\");\r\nconst
+    UnityEngine = require(\"UnityEngine\");\r\nclass SideViewController extends ZEPETO_Script_1.ZepetoScriptBehaviour
+    {\r\n    constructor() {\r\n        super(...arguments);\r\n        this.cameraDistance
+    = 10;\r\n        this.originSpawnPoint = new UnityEngine_1.Vector3(-16, -5, 0);\r\n       
+    this.startPos = UnityEngine_1.Vector2.zero;\r\n        this.curPos = UnityEngine_1.Vector2.zero;\r\n       
+    this.isTriggered = false;\r\n        this.isTouchDown = false;\r\n    }\r\n   
+    CanMove() {\r\n        return this.isTouchDown && !this.isTriggered;\r\n    }\r\n   
+    OnEnable() {\r\n        this.playerInput = this.gameObject.GetComponent($typeof(UnityEngine_InputSystem_1.PlayerInput));\r\n   
+    }\r\n    Start() {\r\n        this.touchTriggerAction = this.playerInput.actions.FindAction(\"MoveTrigger\");\r\n       
+    this.touchPositionAction = this.playerInput.actions.FindAction(\"Move\");\r\n       
+    this.touchTriggerAction.add_started((context) => {\r\n            this.isTriggered
+    = true;\r\n            this.isTouchDown = true;\r\n        });\r\n        this.touchTriggerAction.add_canceled((context)
+    => {\r\n            this.isTriggered = false;\r\n            this.isTouchDown
+    = false;\r\n        });\r\n        this.touchPositionAction.add_performed((context)
+    => {\r\n            if (this.isTouchDown) {\r\n                this.curPos =
+    context.ReadValueAsObject();\r\n                if (this.isTriggered) {\r\n                   
+    this.isTriggered = false;\r\n                    this.startPos = this.curPos;\r\n               
+    }\r\n            }\r\n        });\r\n        //turn off zepeto camera\r\n       
+    ZEPETO_Character_Controller_1.ZepetoPlayers.instance.OnAddedLocalPlayer.AddListener(()
+    => {\r\n            ZEPETO_Character_Controller_1.ZepetoPlayers.instance.LocalPlayer.zepetoCamera.gameObject.SetActive(false);\r\n           
+    this.myCharacter = ZEPETO_Character_Controller_1.ZepetoPlayers.instance.LocalPlayer.zepetoPlayer.character;\r\n           
+    //this.customCamera.transform.position = this.myCharacter.transform.position
+    + this.originSpawnPoint;\r\n            //this.StartCoroutine(this.InputControlLoop());\r\n       
+    });\r\n    }\r\n    *InputControlLoop() {\r\n        while (true) {\r\n           
+    yield new UnityEngine.WaitForEndOfFrame();\r\n            if (this.myCharacter
+    && this.CanMove()) {\r\n                var camRot = UnityEngine_1.Quaternion.Euler(0,
+    UnityEngine.Camera.main.transform.rotation.eulerAngles.y, 0);\r\n               
+    var moveDir = UnityEngine_1.Vector2.op_Subtraction(this.curPos, this.startPos);\r\n               
+    moveDir = UnityEngine_1.Vector2.op_Division(moveDir, 100);\r\n               
+    if (moveDir.magnitude > 0) {\r\n                    if (moveDir.magnitude > 1)\r\n                       
+    moveDir.Normalize();\r\n                    //left-right\r\n                   
+    var optMoveDir = new UnityEngine_1.Vector3(moveDir.x, 0, 0);\r\n                   
+    optMoveDir = UnityEngine_1.Vector3.op_Multiply(optMoveDir, UnityEngine_1.Time.deltaTime
+    * 80);\r\n                    const vectorT = UnityEngine_1.Quaternion.op_Multiply(camRot,
+    optMoveDir);\r\n                    this.myCharacter.Move(UnityEngine_1.Quaternion.op_Multiply(camRot,
+    optMoveDir));\r\n                    console.log(`[InputControlLoop] ${vectorT.ToString()}`);\r\n               
+    }\r\n            }\r\n        }\r\n    }\r\n    //follow zepeto character\r\n   
+    LateUpdate() {\r\n        if (null == this.myCharacter) {\r\n            return;\r\n       
+    }\r\n        let characterPos = this.myCharacter.transform.position;\r\n       
+    //let cameraPosition = new Vector3(characterPos.x - this.cameraDistance, this.customCamera.transform.position.y,
+    characterPos.z);\r\n        //let cameraPosition = new Vector3(characterPos.x
+    - this.cameraDistance, characterPos.y + 1, characterPos.z);\r\n        //this.customCamera.transform.position
+    = cameraPosition;\r\n    }\r\n}\r\nexports.default = SideViewController;\r\n//#
+    sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiU2lkZVZpZXdDb250cm9sbGVyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiU2lkZVZpZXdDb250cm9sbGVyLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUEsaURBQW1EO0FBQ2xELHFFQUErRDtBQUUvRCw2RUFBd0c7QUFDeEcsNkNBQStEO0FBQ2hFLDJDQUEyQztBQUczQyxNQUFxQixrQkFBbUIsU0FBUSxxQ0FBcUI7SUFBckU7O1FBR1csbUJBQWMsR0FBWSxFQUFFLENBQUM7UUFFNUIscUJBQWdCLEdBQWEsSUFBSSxxQkFBTyxDQUFDLENBQUMsRUFBRSxFQUFDLENBQUMsQ0FBQyxFQUFDLENBQUMsQ0FBQyxDQUFDO1FBRW5ELGFBQVEsR0FBWSxxQkFBTyxDQUFDLElBQUksQ0FBQztRQUNqQyxXQUFNLEdBQVkscUJBQU8sQ0FBQyxJQUFJLENBQUM7UUFNL0IsZ0JBQVcsR0FBWSxLQUFLLENBQUM7UUFDN0IsZ0JBQVcsR0FBWSxLQUFLLENBQUM7SUEwRnpDLENBQUM7SUF4RlcsT0FBTztRQUNYLE9BQU8sSUFBSSxDQUFDLFdBQVcsSUFBSSxDQUFDLElBQUksQ0FBQyxXQUFXLENBQUM7SUFDakQsQ0FBQztJQUdELFFBQVE7UUFDSixJQUFJLENBQUMsV0FBVyxHQUFHLElBQUksQ0FBQyxVQUFVLENBQUMsWUFBWSxTQUFDLHFDQUFXLEVBQUcsQ0FBQztJQUNuRSxDQUFDO0lBRUQsS0FBSztRQUVELElBQUksQ0FBQyxrQkFBa0IsR0FBRyxJQUFJLENBQUMsV0FBVyxDQUFDLE9BQU8sQ0FBQyxVQUFVLENBQUMsYUFBYSxDQUFDLENBQUM7UUFDN0UsSUFBSSxDQUFDLG1CQUFtQixHQUFHLElBQUksQ0FBQyxXQUFXLENBQUMsT0FBTyxDQUFDLFVBQVUsQ0FBQyxNQUFNLENBQUMsQ0FBQztRQUV2RSxJQUFJLENBQUMsa0JBQWtCLENBQUMsV0FBVyxDQUFDLENBQUMsT0FBTyxFQUFDLEVBQUU7WUFDM0MsSUFBSSxDQUFDLFdBQVcsR0FBRyxJQUFJ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","assetPath":"Assets/Charactor
+    Script/SideViewController.ts","manifest":{"properties":[{"assembly":"UnityEngine.CoreModule","name":"customCamera","type":"UnityEngine.Camera","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[]},{"assembly":"mscorlib","name":"cameraDistance","type":"System.Single","isArray":false,"initValue":["10"],"enumKeys":[],"enumValues":[],"attributes":[]}],"name":"SideViewController","description":""},"isCompiled":true}'
+  typescriptHash: 5f4609428062c4b80299e38f85106e16
+  onlyWriteTrigger: 0

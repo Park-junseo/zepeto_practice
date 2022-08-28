@@ -74,7 +74,7 @@
 
 import {Sandbox, SandboxOptions, SandboxPlayer} from "ZEPETO.Multiplay";
 import {DataStorage} from "ZEPETO.Multiplay.DataStorage";
-import {LandingPoint, Player, Transform, Trigger, Vector3} from "ZEPETO.Multiplay.Schema";
+import {LandingPoint, Player, SelfieIK, Transform, Trigger, Vector3} from "ZEPETO.Multiplay.Schema";
 
 export default class extends Sandbox {
 
@@ -171,6 +171,10 @@ export default class extends Sandbox {
         this.state.landingPoints.set(client.sessionId, new LandingPoint());
         /* landingPoints Map------------------*/
 
+        /* selfieIKs Map------------------*/
+        this.state.selfieIKs.set(client.sessionId, new SelfieIK());
+        /* selfieIKs Map------------------*/   
+
         // [DataStorage] 입장한 Player의 DataStorage Load
         const storage: DataStorage = client.loadDataStorage();
 
@@ -196,5 +200,6 @@ export default class extends Sandbox {
         this.state.players.delete(client.sessionId);
         this.state.jumpTriggers.delete(client.sessionId);
         this.state.landingPoints.delete(client.sessionId);
+        this.state.selfieIKs.delete(client.sessionId);
     }
 }

@@ -1,1 +1,91 @@
-{}
+{
+    "name": "SideView",
+    "maps": [
+        {
+            "name": "Player",
+            "id": "3382a453-9d5d-490a-9b63-4f68058b1824",
+            "actions": [
+                {
+                    "name": "Move",
+                    "type": "PassThrough",
+                    "id": "3b77a5cf-58ff-4f82-8a58-0661310f35e3",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "MoveTrigger",
+                    "type": "Button",
+                    "id": "03506bbe-4d8b-4a10-bd3c-fb8ed547e172",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "be0c0ecc-e60c-4130-82bb-7317ea594b03",
+                    "path": "<Mouse>/Position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "sideView",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d3e01902-6971-4045-a977-150beaadc632",
+                    "path": "<Touchscreen>/Position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "sideView",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f1143645-0863-4b5f-a818-9d21bbe57d20",
+                    "path": "<Mouse>/Press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "sideView",
+                    "action": "MoveTrigger",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f84be8c5-7ea0-457b-b37b-4d5f5acbf551",
+                    "path": "<Touchscreen>/Press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "sideView",
+                    "action": "MoveTrigger",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "sideView",
+            "bindingGroup": "sideView",
+            "devices": [
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Touchscreen>",
+                    "isOptional": true,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}
