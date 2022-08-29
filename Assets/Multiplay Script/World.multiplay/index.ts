@@ -138,6 +138,37 @@ export default class extends Sandbox {
             ladingPoint.transform = transform;
         });
 
+        this.onMessage("onSelfieIK", (client, message)=>{
+
+            const selfieIK = this.state.selfieIKs.get(client.sessionId);
+            const player = this.state.players.get(client.sessionId);
+
+            const lookAt = new Vector3();
+            lookAt.x = message.lookAt.x;
+            lookAt.y = message.lookAt.y;
+            lookAt.z = message.lookAt.z;
+            selfieIK.lookAt = lookAt;
+
+            const targetAt = new Vector3();
+            targetAt.x = message.targetAt.x;
+            targetAt.y = message.targetAt.y;
+            targetAt.z = message.targetAt.z;
+            selfieIK.targetAt = targetAt;
+
+            selfieIK.isSelfie = message.isSelfie;
+            player.isSelfieIK = selfieIK.isSelfie;
+
+        });
+
+        this.onMessage("onSelfieIKExit", (client, message)=>{
+
+            const selfieIK = this.state.selfieIKs.get(client.sessionId);
+            const player = this.state.players.get(client.sessionId);
+
+            selfieIK.isSelfie = message.isSelfie;
+            player.isSelfieIK = selfieIK.isSelfie;
+        });
+
     }
     
    
@@ -156,6 +187,7 @@ export default class extends Sandbox {
         if (client.userId) {
             player.zepetoUserId = client.userId;
         }
+        player.isSelfieIK = false;
         // client 객체의 고유 키값인 sessionId 를 사용해서 Player 객체를 관리.
         // set 으로 추가된 player 객체에 대한 정보를 클라이언트에서는 players 객체에 add_OnAdd 이벤트를 추가하여 확인 할 수 있음.
         this.state.players.set(client.sessionId, player);

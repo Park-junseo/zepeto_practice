@@ -13,8 +13,8 @@ export default class IKController extends ZepetoScriptBehaviour {
 
     // Body and head weight setting for target
     // Controls how strongly the body reacts to the movement of the target
-    private bodyWeight: number = 0.3;
-    private headWeight: number = 0.7; 
+    private _bodyWeight: number = 0.3;
+    private _headWeight: number = 0.7; 
 
     //Whether or not to apply IK
     private useIKWeight: boolean = false;
@@ -76,7 +76,7 @@ export default class IKController extends ZepetoScriptBehaviour {
 
 
         // Set the look weight when the body and head looks at the target. 
-        this.animator.SetLookAtWeight(1, this.bodyWeight, this.headWeight);
+        this.animator.SetLookAtWeight(1, this._bodyWeight, this._headWeight);
         // set lookAt target
         this.animator.SetLookAtPosition(this.lookAtTarget.position);
         // this.animator.SetLookAtPosition(look);
@@ -101,18 +101,18 @@ export default class IKController extends ZepetoScriptBehaviour {
         //console.log(`[OnAnimatorIK] ${this.gripTarget.gameObject.name}/${this.lookAtTarget.gameObject.name}: ${this.gripTarget.position.ToString()}/${this.lookAtTarget.position.ToString()}`);
     }
 
-    LateUpdate() {
-        this.ikRotation = Quaternion.FromToRotation(this.bodySource.position, this.gripTarget.position);
-        // this.ikPosition = ZepetoPlayers.instance.ZepetoCamera.cameraParent.transform.position;
-        // console.log(this.ikPosition.ToString());
-        // this.animator.SetBoneLocalRotation(HumanBodyBones.Chest, Quaternion.Euler(new Vector3(3, 0, 0)));
-    }
+    // LateUpdate() {
+    //     this.ikRotation = Quaternion.FromToRotation(this.bodySource.position, this.gripTarget.position);
+    //     // this.ikPosition = ZepetoPlayers.instance.ZepetoCamera.cameraParent.transform.position;
+    //     // console.log(this.ikPosition.ToString());
+    //     // this.animator.SetBoneLocalRotation(HumanBodyBones.Chest, Quaternion.Euler(new Vector3(3, 0, 0)));
+    // }
 
     public GetLookAtTransform() {return this.lookAtTarget; }
     public GetTargetAtTransform() {return this.gripTarget; }
 
-    public GetBodyWeight() {return this.bodyWeight;}
-    public GetHeadWeight() {return this.headWeight;}
+    public get bodyWeight() {return this._bodyWeight;}
+    public get headWeight() {return this._headWeight;}
 
     public GetLookAtAndTargetAt() {
         return [
