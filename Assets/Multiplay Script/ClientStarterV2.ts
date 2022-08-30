@@ -23,6 +23,15 @@ type Counter = {
     value: number;
 }
 
+type PlayerControlState = {
+    playerState: Player;
+    zepetoPlayer: ZepetoPlayer;
+    jumpCounter: Counter;
+    selfieIK:SelfieIK;
+    isLoaded: boolean;
+    isLocal: boolean;
+}
+
 export default class ClientStarterV2 extends ZepetoScriptBehaviour {
 
     private static Instance: ClientStarterV2;
@@ -31,12 +40,15 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
 
     public debugText: Text;
 
-    private clientIKManager: ClientIKManager;
+    //private clientIKManager: ClientIKManager;
 
     private room: Room;
-    private currentPlayers: Map<string, Player> = new Map<string, Player>();
-    private curPlayersPrevplayerState:Map<string, PlayerStatus> = new Map<string, PlayerStatus>();
-    private curPlayersJumpCounter:Map<string, Counter> = new Map<string, Counter>();
+    // private currentPlayers: Map<string, Player> = new Map<string, Player>();
+    // private curPlayersPrevplayerState:Map<string, PlayerStatus> = new Map<string, PlayerStatus>();
+    // private curPlayersJumpCounter:Map<string, Counter> = new Map<string, Counter>();
+
+    private curPlayerControlStates:Map<string, PlayerControlState> = new Map<string, PlayerControlState>();
+    private curPlayerSessionIds:string[] = [];
 
     private zepetoPlayer: ZepetoPlayer;
 
@@ -90,7 +102,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
 
     private Awake() {
         ClientStarterV2.Instance = this;
-        this.clientIKManager = this.clientIKManager || this.gameObject.AddComponent<ClientIKManager>();
+        //this.clientIKManager = this.clientIKManager || this.gameObject.AddComponent<ClientIKManager>();
     }
 
     private Start() {
@@ -105,6 +117,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
 
         this.StartCoroutine(this.SendMessageLoop(0.04));
         this.StartCoroutine(this.CheckValidControl(1.0));
+        this.StartCoroutine(this.HandlePlayerInstances());
         //this.StartCoroutine(this.FixRotation());
 
         // ZepetoPlayers.instance.controllerData.controlMode = 1;
@@ -122,13 +135,11 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                 const hasPlayer = ZepetoPlayers.instance.HasPlayer(this.room.SessionId);
                 if (hasPlayer) {
                     character = ZepetoPlayers.instance.GetPlayer(this.room.SessionId).character;        
-                    console.log(ZepetoPlayers.instance.motionV2Data.jumpDashSpeedThreshold);                          
+                    // console.log(ZepetoPlayers.instance.motionV2Data.jumpDashSpeedThreshold);                          
                     break;
                 }
             }
         }
-
-        const playerState = this.curPlayersPrevplayerState.get(this.room.SessionId);
 
         let haveToSendisActiveSelfie = true;
 
@@ -136,10 +147,9 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
             yield new UnityEngine.WaitForEndOfFrame();
 
             if (this.room != null && this.room.IsConnected && character.isActiveAndEnabled) {
-                if(character.CurrentState !== CharacterState.Idle || playerState.state !== CharacterState.Idle) {
-                    this.SendTransform(character.transform, character.CurrentState);
-                    this.SendState(character.CurrentState);
-                }
+                this.SendTransform(character.transform, character.CurrentState);
+                this.SendState(character.CurrentState);
+
                 if(ScreenShotModeManager.GetInstance().isActiveSelfie) {
                     this.SendSelfieIK(...(ScreenShotModeManager.GetInstance().GetIKController().GetLookAtAndTargetAt()));
                     haveToSendisActiveSelfie = true;
@@ -147,8 +157,8 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                     this.SendSelfieExit();
                     haveToSendisActiveSelfie = false;
                 }
-                this.JumpThisPlayer();
-                this.CheckValidGoundLayer(character);
+                // this.JumpThisPlayer();
+                // this.CheckValidGoundLayer(character);
                 this.debugText.text = `${this.characterStateMap.get(character.CurrentState)}/${this.characterMoveStateMap.get(character.MotionV2.CurrentMoveState)}/${this.characterJumpStateMap.get(character.MotionV2.CurrentJumpState)} camera:${ScreenShotModeManager.GetInstance().isActiveSelfie}`;
                 this.debugText.text += `move: ${character.characterController.velocity.ToString()}`;
             }
@@ -196,23 +206,27 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
             // [CharacterController] (Local) Called when the Player instance is fully loaded in Scene
             ZepetoPlayers.instance.OnAddedPlayer.AddListener((sessionId: string) => {
                 const isLocal = this.room.SessionId === sessionId;
+
+                const playerControlStates = this.curPlayerControlStates.get(sessionId);
+                playerControlStates.zepetoPlayer = ZepetoPlayers.instance.GetPlayer(sessionId);
+                playerControlStates.isLoaded = true;
+
                 if (!isLocal) {
-                    const player: Player = this.currentPlayers.get(sessionId);
+                    const playerControlStates = this.curPlayerControlStates.get(sessionId);
+                    
+                    // const player: Player = this.currentPlayers.get(sessionId);
                     const jumpTrigger: Trigger = this.room.State.jumpTriggers.get_Item(sessionId);
-                    const landingPoint: LandingPoint = this.room.State.landingPoints.get_Item(sessionId);
+                    // const landingPoint: LandingPoint = this.room.State.landingPoints.get_Item(sessionId);
 
+                    // const prevPlayerState = this.curPlayersPrevplayerState.get(sessionId);
+                    // const jumpCounter = this.curPlayersJumpCounter.get(sessionId);
 
-                    const zepetoPlayer = ZepetoPlayers.instance.GetPlayer(sessionId);
-                    const prevPlayerState = this.curPlayersPrevplayerState.get(sessionId);
-                    const jumpCounter = this.curPlayersJumpCounter.get(sessionId);
-
-                    let temp:string = '';
                     // [RoomState] Called whenever the state of the player instance is updated. 
-                    player.OnChange += (changeValues) => {
-                        this.OnUpdatePlayer(zepetoPlayer, prevPlayerState, player, jumpCounter, temp);
+                    playerControlStates.playerState.OnChange += (changeValues) => {
+                        this.OnUpdatePlayer(playerControlStates.zepetoPlayer, playerControlStates.playerState, playerControlStates.jumpCounter);
                         //console.log(temp);
                     }                    
-                    jumpTrigger.OnChange += (changeVlaues) => this.HandleJumpCounter(jumpCounter);
+                    jumpTrigger.OnChange += (changeVlaues) => this.HandleJumpCounter(playerControlStates.jumpCounter);
                     // trigger.OnChange += (changeVlaues) => this.StartCoroutine(this.OnHandlePlayerJump(zepetoPlayer.character, jumpCounter));
                     
                     // zepetoPlayer.character.OnChangedState.AddListener((cur,prev)=>this.FixPlayerLandingPoint(
@@ -226,7 +240,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                     //     this.OnJumpPlayer(zepetoPlayer.character, jumpCounter, cur, prev)
                     // });
 
-                    zepetoPlayer.character.ZepetoAnimator.gameObject.AddComponent<PlayerIKController>().Init(this.room.State.selfieIKs.get_Item(sessionId));
+                    playerControlStates.zepetoPlayer.character.ZepetoAnimator.gameObject.AddComponent<PlayerIKController>().Init(playerControlStates.selfieIK);
 
                 } 
                 
@@ -234,25 +248,34 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         }
 
         let join = new Map<string, Player>();
-        let leave = new Map<string, Player>(this.currentPlayers);
+        let leave = [...this.curPlayerSessionIds];
 
         state.players.ForEach((sessionId: string, player: Player) => {
-            if (!this.currentPlayers.has(sessionId)) {
+            if (!this.curPlayerSessionIds.includes(sessionId)) {
                 join.set(sessionId, player);
             }
-            leave.delete(sessionId);
+            if(leave.length>0) leave[leave.indexOf(sessionId)] = '';//leave.delete(sessionId);
         });
 
+        const prevPlayerCount = this.curPlayerControlStates.size;
         // [RoomState] Create a player instance for players that enter the Room
         join.forEach((player: Player, sessionId: string) => this.OnJoinPlayer(sessionId, player, state.selfieIKs.get_Item(sessionId)));
+        if(join.size>0 && prevPlayerCount + join.size === this.curPlayerControlStates.size)
+            this.curPlayerSessionIds.push(...join.keys());
 
         // [RoomState] Remove the player instance for players that exit the room
-        leave.forEach((player: Player, sessionId: string) => this.OnLeavePlayer(sessionId, player));
+        //leave.forEach((player: Player, sessionId: string) => this.OnLeavePlayer(sessionId, player));
+        leave = leave.filter((sessionId) => sessionId !== '');
+        leave.forEach((sessionId:string)=>this.OnLeavePlayer(sessionId));
+        if(leave.length > 0)
+            this.curPlayerSessionIds = [...this.curPlayerControlStates.keys()];
     }
 
     private OnJoinPlayer(sessionId: string, player: Player, selfieIK:SelfieIK) {
+        if(!selfieIK) return;
+
         console.log(`[OnJoinPlayer] players - sessionId : ${sessionId}`);
-        this.currentPlayers.set(sessionId, player);
+        // this.currentPlayers.set(sessionId, player);
 
         const spawnInfo = new SpawnInfo();
         const position = ClientStarterV2.ParseVector3(player.transform.position);
@@ -260,78 +283,49 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         spawnInfo.position = position;
         spawnInfo.rotation = UnityEngine.Quaternion.Euler(rotation);
 
-        this.curPlayersPrevplayerState.set(sessionId, {
-            state: player.state,
-            position: position,
-            rotation: UnityEngine.Quaternion.Euler(rotation)
-        });
+        // this.curPlayersPrevplayerState.set(sessionId, {
+        //     state: player.state,
+        //     position: position,
+        //     rotation: UnityEngine.Quaternion.Euler(rotation)
+        // });
 
-        this.curPlayersJumpCounter.set(sessionId, {value:0});
+        // this.curPlayersJumpCounter.set(sessionId, {value:0});
 
-        if(sessionId !== this.room.SessionId) this.clientIKManager.AddPlayerIK(sessionId, selfieIK);
+        // if(sessionId !== this.room.SessionId) this.clientIKManager.AddPlayerIK(sessionId, selfieIK);
 
         const isLocal = this.room.SessionId === player.sessionId;
+
+        this.curPlayerControlStates.set(sessionId, {
+            playerState: player,
+            zepetoPlayer: undefined,
+            jumpCounter: {value:0},
+            selfieIK: selfieIK,
+            isLoaded: false,
+            isLocal: isLocal
+        });
+
         ZepetoPlayers.instance.CreatePlayerWithUserId(sessionId, player.zepetoUserId, spawnInfo, isLocal);
     }
 
-    private OnLeavePlayer(sessionId: string, player: Player) {
+    private OnLeavePlayer(sessionId: string) {
         console.log(`[OnRemove] players - sessionId : ${sessionId}`);
-        this.currentPlayers.get(sessionId).OnChange = null;
-        this.currentPlayers.get(sessionId).OnChange = null;
-        this.currentPlayers.delete(sessionId);
-        this.curPlayersPrevplayerState.delete(sessionId);
-        this.curPlayersJumpCounter.delete(sessionId);
-        if(sessionId !== this.room.SessionId) this.clientIKManager.DeletePlayerIK(sessionId);
+        // this.currentPlayers.get(sessionId).OnChange = null;
+        // this.currentPlayers.get(sessionId).OnChange = null;
+        // this.currentPlayers.delete(sessionId);
+        // this.curPlayersPrevplayerState.delete(sessionId);
+        // this.curPlayersJumpCounter.delete(sessionId);
+
+        // if(sessionId !== this.room.SessionId) this.clientIKManager.DeletePlayerIK(sessionId);
 
         ZepetoPlayers.instance.RemovePlayer(sessionId);
+
+        this.curPlayerControlStates.delete(sessionId);
     }
 
-    private OnUpdatePlayer(zepetoPlayer: ZepetoPlayer, prevPlayerState:PlayerStatus, player: Player,jumpCounter:Counter, $temp:string) {
+    private OnUpdatePlayer(zepetoPlayer: ZepetoPlayer, player: Player,jumpCounter:Counter ) {
 
         const position = ClientStarterV2.ParseVector3(player.transform.position);
         const rotation = ClientStarterV2.ParseVector3(player.transform.rotation);
-
-
-        // // 동기화 보정
-        // // if(prevPlayerState.state === CharacterState.Idle && player.state === CharacterState.Idle)
-        // if(prevPlayerState.state === CharacterState.Idle && player.state === CharacterState.Idle)
-        // {
-        //     if ((prevPlayerState.position.Equals(zepetoPlayer.character.transform.position) &&
-        //         prevPlayerState.rotation.Equals(zepetoPlayer.character.transform.rotation)))
-        //         return;
-        //     zepetoPlayer.character.transform.position = prevPlayerState.position;
-        //     zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
-        // }
-
-        // // 동기화 보정
-        // // if(prevPlayerState.state === CharacterState.Idle && player.state === CharacterState.Idle)
-        // if((player.state === CharacterState.Idle || 
-        //     player.state === CharacterState.Stamp ||
-        //     player.state === CharacterState.Landing) &&
-        //     player.state === prevPlayerState.state )
-        // {
-        //     if ((prevPlayerState.position.Equals(zepetoPlayer.character.transform.position) &&
-        //         prevPlayerState.rotation.Equals(zepetoPlayer.character.transform.rotation)))
-        //         return;
-        //     zepetoPlayer.character.transform.position = prevPlayerState.position;
-        //     if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
-        // }
-
-        // if((zepetoPlayer.character.CurrentState === CharacterState.Stamp || zepetoPlayer.character.CurrentState === CharacterState.Landing) && 
-        //     (prevPlayerState.landingPosition && prevPlayerState.landingRotation))
-        // {
-        //     // if ((prevPlayerState.position.Equals(zepetoPlayer.character.transform.position) &&
-        //     //     prevPlayerState.rotation.Equals(zepetoPlayer.character.transform.rotation)))
-        //     //     return;
-        //     // zepetoPlayer.character.transform.position = prevPlayerState.position;
-        //     // zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
-
-        //     zepetoPlayer.character.transform.position = prevPlayerState.landingPosition;
-        //     zepetoPlayer.character.transform.rotation = prevPlayerState.landingRotation;
-
-        //     prevPlayerState.landingPosition = null;
-        //     prevPlayerState.landingRotation = null;
-        // } 
 
         var moveDir = UnityEngine.Vector3.op_Subtraction(position, zepetoPlayer.character.transform.position);
         moveDir = new UnityEngine.Vector3(moveDir.x, 0, moveDir.z);
@@ -340,29 +334,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         // 동기화2
         const curSpeed = zepetoPlayer.character.characterController.velocity.magnitude;
         const moveDelta = moveDir.magnitude;
-        // if(moveDelta > 0 && curSpeed === 0) {
-        //     zepetoPlayer.character.transform.position = prevPlayerState.position;
-        //     if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
-        // }
-        // if (moveDelta < 0.05) {
-        //     if (player.state === CharacterState.MoveTurn)
-        //         return;
-        //     zepetoPlayer.character.StopMoving();
 
-        // if(moveDelta > 0 && curSpeed === 0) {
-        //     if(player.state !== CharacterState.MoveTurn)
-        //         return;
-        //     zepetoPlayer.character.StopMoving();
-        //     zepetoPlayer.character.transform.position = prevPlayerState.position;
-        //     if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
-        // } else if (moveDelta < 0.05 && player.state === CharacterState.Idle) {
-        //     if (player.state === CharacterState.MoveTurn)
-        //         return;
-        //     zepetoPlayer.character.StopMoving();
-        //     if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
-        // } else {
-        //     zepetoPlayer.character.MoveContinuously(moveDir);
-        // }
         if(curSpeed === 0 && this.stopPlayerStates.includes(player.state)) {
             zepetoPlayer.character.StopMoving();
             zepetoPlayer.character.transform.position = position;
@@ -370,112 +342,115 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         }
         
         if (moveDelta < 0.05 && this.stopPlayerStates.includes(player.state)) {
-            // if(player.state === CharacterState.MoveTurn)
-            //     return;
             zepetoPlayer.character.StopMoving();
         } else {
             zepetoPlayer.character.MoveContinuously(moveDir);
         }
 
-        console.log(`[UpdatePlayer]${moveDelta}/${curSpeed}/${this.characterStateMap.get(player.state)}`);
-
-        if(prevPlayerState) {
-            if(prevPlayerState.state === CharacterState.Jump || prevPlayerState.state === CharacterState.Falling && 
-                player.state !==CharacterState.Jump && player.state !== CharacterState.Falling)
-            {
-                prevPlayerState.landingPosition = position;
-                prevPlayerState.landingRotation = UnityEngine.Quaternion.Euler(rotation);
-            } 
-
-            prevPlayerState.state = player.state;//player.expectedState as CharacterState;
-            prevPlayerState.position = position;
-            prevPlayerState.rotation = UnityEngine.Quaternion.Euler(rotation);
-
-            // if((player.state === CharacterState.Stamp || player.state === CharacterState.Landing) && 
-            //     player.state !== prevPlayerState.state)
-            // {
-            //     // if ((prevPlayerState.position.Equals(zepetoPlayer.character.transform.position) &&
-            //     //     prevPlayerState.rotation.Equals(zepetoPlayer.character.transform.rotation)))
-            //     //     return;
-            //     // zepetoPlayer.character.transform.position = prevPlayerState.position;
-            //     // zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
-
-            //     prevPlayerState.landingPosition = position;
-            //     prevPlayerState.landingRotation = UnityEngine.Quaternion.Euler(rotation);
-            // } 
-        }
+        //console.log(`[UpdatePlayer]${moveDelta}/${curSpeed}/${this.characterStateMap.get(player.state)}`);
     }
 
     private HandleJumpCounter(jumpCounter: Counter) {
         jumpCounter.value += 1;
     };
 
-    private* OnHandlePlayerJump(character:ZepetoCharacter, jumpCounter: Counter) {
-        jumpCounter.value += 1;
+    // private* OnHandlePlayerJump(character:ZepetoCharacter, jumpCounter: Counter) {
+    //     jumpCounter.value += 1;
 
-        while(true) {
-            if(jumpCounter.value > 0 && character && !this.unableJumpStates.includes(character.CurrentState)) {
+    //     while(true) {
+    //         if(jumpCounter.value > 0 && character && !this.unableJumpStates.includes(character.CurrentState)) {
+    //             character.Jump();
+    //             jumpCounter.value -= 1;
+    //             break;
+    //         }
+    //         yield null;
+    //     }
+    // };
+
+    // private JumpThisPlayer() {
+    //     // this.curPlayerControlStates.forEach((playerControlStates:Counter, sessionId:string)=>{
+    //     //     // 점프하기
+    //     //     if(jumpCounter.value > 0) {
+    //     //         const character = ZepetoPlayers.instance.GetPlayer(sessionId).character;
+    //     //         if(character && !this.unableJumpStates.includes(character.CurrentState)) {
+    //     //             character.Jump();
+    //     //             jumpCounter.value -= 1;
+    //     //         }
+    //     //     }
+    //     // });
+    // }
+
+    private SetJumpPlayerInstance(character:ZepetoCharacter, jumpCounter: Counter) {
+        if(!jumpCounter) return;
+
+        if(jumpCounter.value > 0) {
+            if(!this.unableJumpStates.includes(character.CurrentState)) {
                 character.Jump();
                 jumpCounter.value -= 1;
-                break;
             }
-            yield null;
         }
-    };
+    }
 
-    private JumpThisPlayer() {
-        this.curPlayersJumpCounter.forEach((jumpCounter:Counter, sessionId:string)=>{
+    private SetLookAtPlayerInstance(character:ZepetoCharacter, selfieIK:SelfieIK) {
+        if(!selfieIK) return;
+
+        const lookAtVector = ClientStarterV2.ParseVector3(selfieIK.lookAt);
+
+        // character.transform.rotation.SetLookRotation(lookAtVector);// = lookAtVector;// = Quaternion.Euler(lookAtVector);
+        character.transform.LookAt(lookAtVector);
+        character.transform.eulerAngles = new UnityEngine.Vector3(0, character.transform.eulerAngles.y, 0);
+        //console.log(`${sessionId}: ${character.transform.rotation.eulerAngles.ToString()}`);
+    }
+
+    private* HandlePlayerInstances() {
+        this.curPlayerControlStates.forEach((controlStates:PlayerControlState, sessionId:string)=>{
+            if(controlStates.isLoaded || !controlStates.isLoaded || !controlStates.zepetoPlayer) return;
             // 점프하기
-            if(jumpCounter.value > 0) {
-                const character = ZepetoPlayers.instance.GetPlayer(sessionId).character;
-                if(character && !this.unableJumpStates.includes(character.CurrentState)) {
-                    character.Jump();
-                    jumpCounter.value -= 1;
-                }
-            }
+            this.SetJumpPlayerInstance(controlStates.zepetoPlayer.character, controlStates.jumpCounter);
+            this.SetLookAtPlayerInstance(controlStates.zepetoPlayer.character, controlStates.selfieIK);
         });
     }
 
-    private OnJumpPlayer(character: ZepetoCharacter, jumpCounter:Counter, curState:CharacterState, prevState:CharacterState) {
-        if(jumpCounter.value > 0) {
-            if(character && !this.unableJumpStates.includes(curState)) {
-                character.Jump();
-                jumpCounter.value -= 1;
-            }
-        }
-    }
+    // private OnJumpPlayer(character: ZepetoCharacter, jumpCounter:Counter, curState:CharacterState, prevState:CharacterState) {
+    //     if(jumpCounter.value > 0) {
+    //         if(character && !this.unableJumpStates.includes(curState)) {
+    //             character.Jump();
+    //             jumpCounter.value -= 1;
+    //         }
+    //     }
+    // }
 
-    private FixPlayerLandingPointWithState(character: ZepetoCharacter, playerState:PlayerStatus, curState:CharacterState, prevState:CharacterState) {
-        if(prevState===CharacterState.Jump || prevState === CharacterState.Falling && 
-            curState!==CharacterState.Jump && curState !== CharacterState.Falling &&
-            (playerState.landingPosition !== null && playerState.landingRotation !== null)) {
-                character.transform.position = playerState.landingPosition;
-                character.transform.rotation = playerState.landingRotation;
+    // private FixPlayerLandingPointWithState(character: ZepetoCharacter, playerState:PlayerStatus, curState:CharacterState, prevState:CharacterState) {
+    //     if(prevState===CharacterState.Jump || prevState === CharacterState.Falling && 
+    //         curState!==CharacterState.Jump && curState !== CharacterState.Falling &&
+    //         (playerState.landingPosition !== null && playerState.landingRotation !== null)) {
+    //             character.transform.position = playerState.landingPosition;
+    //             character.transform.rotation = playerState.landingRotation;
         
-                playerState.landingPosition = null;
-                playerState.landingRotation = null;
-            }
-    }
+    //             playerState.landingPosition = null;
+    //             playerState.landingRotation = null;
+    //         }
+    // }
 
-    private FixPlayerLandingPoint(character: ZepetoCharacter, landingPoint:LandingPoint, curState:CharacterState, prevState:CharacterState) {
-        if(prevState===CharacterState.Jump || prevState === CharacterState.Falling && 
-            curState!==CharacterState.Jump && curState !== CharacterState.Falling) {
-                const position = ClientStarterV2.ParseVector3(landingPoint.transform.position);
-                const rotation = UnityEngine.Quaternion.Euler(ClientStarterV2.ParseVector3(landingPoint.transform.rotation));
+    // private FixPlayerLandingPoint(character: ZepetoCharacter, landingPoint:LandingPoint, curState:CharacterState, prevState:CharacterState) {
+    //     if(prevState===CharacterState.Jump || prevState === CharacterState.Falling && 
+    //         curState!==CharacterState.Jump && curState !== CharacterState.Falling) {
+    //             const position = ClientStarterV2.ParseVector3(landingPoint.transform.position);
+    //             const rotation = UnityEngine.Quaternion.Euler(ClientStarterV2.ParseVector3(landingPoint.transform.rotation));
 
-                character.transform.position = position;
-                character.transform.rotation = rotation;
+    //             character.transform.position = position;
+    //             character.transform.rotation = rotation;
 
-            }
-    }
+    //         }
+    // }
 
-    private IsEqualVector3State(first: UnityEngine.Vector3, second: Vector3):boolean {
-        return (
-            first.x === second.x &&
-            first.y === second.y &&
-            first.z === second.z
-        );
-    }
+    // private IsEqualVector3State(first: UnityEngine.Vector3, second: Vector3):boolean {
+    //     return (
+    //         first.x === second.x &&
+    //         first.y === second.y &&
+    //         first.z === second.z
+    //     );
+    // }
 
     private CheckValidGoundLayer(character:ZepetoCharacter) {
         let ref = $ref<UnityEngine.RaycastHit>(); 
@@ -547,41 +522,41 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         this.room.Send("onSelfieIKExit", data.GetObject());
     }
 
-    private SendPlayerLanding(transform: UnityEngine.Transform, curState: CharacterState, prevState: CharacterState) {
+    // private SendPlayerLanding(transform: UnityEngine.Transform, curState: CharacterState, prevState: CharacterState) {
 
-        if(prevState===CharacterState.Jump || prevState === CharacterState.Falling && 
-            curState!==CharacterState.Jump && curState !== CharacterState.Falling) {
-                const data = new RoomData();
+    //     if(prevState===CharacterState.Jump || prevState === CharacterState.Falling && 
+    //         curState!==CharacterState.Jump && curState !== CharacterState.Falling) {
+    //             const data = new RoomData();
 
-                const pos = new RoomData();
-                pos.Add("x", transform.localPosition.x);
-                pos.Add("y", transform.localPosition.y);
-                pos.Add("z", transform.localPosition.z);
-                data.Add("position", pos.GetObject());
+    //             const pos = new RoomData();
+    //             pos.Add("x", transform.localPosition.x);
+    //             pos.Add("y", transform.localPosition.y);
+    //             pos.Add("z", transform.localPosition.z);
+    //             data.Add("position", pos.GetObject());
         
-                const rot = new RoomData();
-                rot.Add("x", transform.localEulerAngles.x);
-                rot.Add("y", transform.localEulerAngles.y);
-                rot.Add("z", transform.localEulerAngles.z);
-                data.Add("rotation", rot.GetObject());
-                this.room.Send("onPlayerLanding", data.GetObject());
+    //             const rot = new RoomData();
+    //             rot.Add("x", transform.localEulerAngles.x);
+    //             rot.Add("y", transform.localEulerAngles.y);
+    //             rot.Add("z", transform.localEulerAngles.z);
+    //             data.Add("rotation", rot.GetObject());
+    //             this.room.Send("onPlayerLanding", data.GetObject());
         
-                console.log(`[SendLandingPOint] ${transform.localPosition.ToString()}`);
-        }
-    }
+    //             console.log(`[SendLandingPOint] ${transform.localPosition.ToString()}`);
+    //     }
+    // }
 
-    private* FixRotation () {
-        while(true) {
-            this.currentPlayers.forEach((value: Player,sessionId: string) => {
-                if(this.room.SessionId !== sessionId && ZepetoPlayers.instance.HasPlayer(sessionId)) {
-                    const player = ZepetoPlayers.instance.GetPlayer(sessionId);
-                    player.character.transform.rotation = UnityEngine.Quaternion.Euler(UnityEngine.Vector3.zero);
-                    console.log(`[FixRotation] ${sessionId}: ${player.character.transform.rotation.ToString()}`);
-                }
-            });
-            yield new UnityEngine.WaitUntil(()=>true);
-        }
-    }
+    // private* FixRotation () {
+    //     while(true) {
+    //         this.currentPlayers.forEach((value: Player,sessionId: string) => {
+    //             if(this.room.SessionId !== sessionId && ZepetoPlayers.instance.HasPlayer(sessionId)) {
+    //                 const player = ZepetoPlayers.instance.GetPlayer(sessionId);
+    //                 player.character.transform.rotation = UnityEngine.Quaternion.Euler(UnityEngine.Vector3.zero);
+    //                 console.log(`[FixRotation] ${sessionId}: ${player.character.transform.rotation.ToString()}`);
+    //             }
+    //         });
+    //         yield new UnityEngine.WaitUntil(()=>true);
+    //     }
+    // }
 
     // LateUpdate() {
     //     this.currentPlayers.forEach((value: Player,sessionId: string) => {
