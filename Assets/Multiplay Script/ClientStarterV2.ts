@@ -82,6 +82,12 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         CharacterState.Invalid,
     ];
 
+    private stopPlayerStates = [
+        CharacterState.Idle,
+        CharacterState.Stamp,
+        CharacterState.Landing,
+    ]
+
     private Awake() {
         ClientStarterV2.Instance = this;
         this.clientIKManager = this.clientIKManager || this.gameObject.AddComponent<ClientIKManager>();
@@ -144,7 +150,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                 this.JumpThisPlayer();
                 this.CheckValidGoundLayer(character);
                 this.debugText.text = `${this.characterStateMap.get(character.CurrentState)}/${this.characterMoveStateMap.get(character.MotionV2.CurrentMoveState)}/${this.characterJumpStateMap.get(character.MotionV2.CurrentJumpState)} camera:${ScreenShotModeManager.GetInstance().isActiveSelfie}`;
-                this.debugText.text += `move: ${character.characterController.center}`;
+                this.debugText.text += `move: ${character.characterController.velocity.ToString()}`;
             }
             yield secondsTick;
         }
@@ -297,19 +303,19 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         //     zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
         // }
 
-        // 동기화 보정
-        // if(prevPlayerState.state === CharacterState.Idle && player.state === CharacterState.Idle)
-        if((player.state === CharacterState.Idle || 
-            player.state === CharacterState.Stamp ||
-            player.state === CharacterState.Landing) &&
-            player.state === prevPlayerState.state )
-        {
-            if ((prevPlayerState.position.Equals(zepetoPlayer.character.transform.position) &&
-                prevPlayerState.rotation.Equals(zepetoPlayer.character.transform.rotation)))
-                return;
-            zepetoPlayer.character.transform.position = prevPlayerState.position;
-            if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
-        }
+        // // 동기화 보정
+        // // if(prevPlayerState.state === CharacterState.Idle && player.state === CharacterState.Idle)
+        // if((player.state === CharacterState.Idle || 
+        //     player.state === CharacterState.Stamp ||
+        //     player.state === CharacterState.Landing) &&
+        //     player.state === prevPlayerState.state )
+        // {
+        //     if ((prevPlayerState.position.Equals(zepetoPlayer.character.transform.position) &&
+        //         prevPlayerState.rotation.Equals(zepetoPlayer.character.transform.rotation)))
+        //         return;
+        //     zepetoPlayer.character.transform.position = prevPlayerState.position;
+        //     if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
+        // }
 
         // if((zepetoPlayer.character.CurrentState === CharacterState.Stamp || zepetoPlayer.character.CurrentState === CharacterState.Landing) && 
         //     (prevPlayerState.landingPosition && prevPlayerState.landingRotation))
@@ -330,13 +336,48 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         var moveDir = UnityEngine.Vector3.op_Subtraction(position, zepetoPlayer.character.transform.position);
         moveDir = new UnityEngine.Vector3(moveDir.x, 0, moveDir.z);
 
-        if (moveDir.magnitude < 0.05) {
-            if (player.state === CharacterState.MoveTurn)
-                return;
+
+        // 동기화2
+        const curSpeed = zepetoPlayer.character.characterController.velocity.magnitude;
+        const moveDelta = moveDir.magnitude;
+        // if(moveDelta > 0 && curSpeed === 0) {
+        //     zepetoPlayer.character.transform.position = prevPlayerState.position;
+        //     if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
+        // }
+        // if (moveDelta < 0.05) {
+        //     if (player.state === CharacterState.MoveTurn)
+        //         return;
+        //     zepetoPlayer.character.StopMoving();
+
+        // if(moveDelta > 0 && curSpeed === 0) {
+        //     if(player.state !== CharacterState.MoveTurn)
+        //         return;
+        //     zepetoPlayer.character.StopMoving();
+        //     zepetoPlayer.character.transform.position = prevPlayerState.position;
+        //     if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
+        // } else if (moveDelta < 0.05 && player.state === CharacterState.Idle) {
+        //     if (player.state === CharacterState.MoveTurn)
+        //         return;
+        //     zepetoPlayer.character.StopMoving();
+        //     if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = prevPlayerState.rotation;
+        // } else {
+        //     zepetoPlayer.character.MoveContinuously(moveDir);
+        // }
+        if(curSpeed === 0 && this.stopPlayerStates.includes(player.state)) {
+            zepetoPlayer.character.StopMoving();
+            zepetoPlayer.character.transform.position = position;
+            if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation.eulerAngles = rotation;
+        }
+        
+        if (moveDelta < 0.05 && this.stopPlayerStates.includes(player.state)) {
+            // if(player.state === CharacterState.MoveTurn)
+            //     return;
             zepetoPlayer.character.StopMoving();
         } else {
             zepetoPlayer.character.MoveContinuously(moveDir);
         }
+
+        console.log(`[UpdatePlayer]${moveDelta}/${curSpeed}/${this.characterStateMap.get(player.state)}`);
 
         if(prevPlayerState) {
             if(prevPlayerState.state === CharacterState.Jump || prevPlayerState.state === CharacterState.Falling && 
