@@ -106,7 +106,7 @@ export default class extends Sandbox {
 
             player.transform = transform;
 
-            player.expectedState = message.expectedState;
+            //player.expectedState = message.expectedState;
         });
 
         this.onMessage("onChangedState", (client, message) => {

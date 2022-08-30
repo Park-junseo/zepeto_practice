@@ -50,7 +50,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
     private curPlayerControlStates:Map<string, PlayerControlState> = new Map<string, PlayerControlState>();
     private curPlayerSessionIds:string[] = [];
 
-    private zepetoPlayer: ZepetoPlayer;
+    private zepetoPlayer: ZepetoPlayer = undefined;
 
     // action
     private jumpCountHandler: number;
@@ -132,23 +132,33 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         while (true) {
             yield null;
             if (this.room != null && this.room.IsConnected) {
-                const hasPlayer = ZepetoPlayers.instance.HasPlayer(this.room.SessionId);
-                if (hasPlayer) {
-                    character = ZepetoPlayers.instance.GetPlayer(this.room.SessionId).character;        
-                    // console.log(ZepetoPlayers.instance.motionV2Data.jumpDashSpeedThreshold);                          
+                // const hasPlayer = ZepetoPlayers.instance.HasPlayer(this.room.SessionId);
+                // if (hasPlayer) {
+                //     character = ZepetoPlayers.instance.GetPlayer(this.room.SessionId).character;        
+                //     // console.log(ZepetoPlayers.instance.motionV2Data.jumpDashSpeedThreshold);                          
+                //     break;
+                // }
+                if(this.zepetoPlayer) {
+                    character = this.zepetoPlayer.character;
                     break;
                 }
             }
         }
 
         let haveToSendisActiveSelfie = true;
-
+        let prevState = character.CurrentState;
         while (true) {
             yield new UnityEngine.WaitForEndOfFrame();
 
             if (this.room != null && this.room.IsConnected && character.isActiveAndEnabled) {
+
+                // if(!(character.CurrentState === CharacterState.Idle && prevState === CharacterState.Idle)) {
+                //     this.SendTransform(character.transform, character.CurrentState);
+                //     // this.SendState(character.CurrentState);
+                // }
                 this.SendTransform(character.transform, character.CurrentState);
                 this.SendState(character.CurrentState);
+                prevState = character.CurrentState;
 
                 if(ScreenShotModeManager.GetInstance().isActiveSelfie) {
                     this.SendSelfieIK(...(ScreenShotModeManager.GetInstance().GetIKController().GetLookAtAndTargetAt()));
@@ -186,6 +196,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
 
             // [CharacterController] (Local) Called when the Player instance is fully loaded in Scene
             ZepetoPlayers.instance.OnAddedLocalPlayer.AddListener(() => {
+
                 this.zepetoPlayer = ZepetoPlayers.instance.LocalPlayer.zepetoPlayer;
 
                 // 점프 카운트 핸들러
@@ -207,12 +218,10 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
             ZepetoPlayers.instance.OnAddedPlayer.AddListener((sessionId: string) => {
                 const isLocal = this.room.SessionId === sessionId;
 
-                const playerControlStates = this.curPlayerControlStates.get(sessionId);
-                playerControlStates.zepetoPlayer = ZepetoPlayers.instance.GetPlayer(sessionId);
-                playerControlStates.isLoaded = true;
-
                 if (!isLocal) {
                     const playerControlStates = this.curPlayerControlStates.get(sessionId);
+                    playerControlStates.zepetoPlayer = ZepetoPlayers.instance.GetPlayer(sessionId);
+                    playerControlStates.isLoaded = true;
                     
                     // const player: Player = this.currentPlayers.get(sessionId);
                     const jumpTrigger: Trigger = this.room.State.jumpTriggers.get_Item(sessionId);
@@ -223,7 +232,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
 
                     // [RoomState] Called whenever the state of the player instance is updated. 
                     playerControlStates.playerState.OnChange += (changeValues) => {
-                        this.OnUpdatePlayer(playerControlStates.zepetoPlayer, playerControlStates.playerState, playerControlStates.jumpCounter);
+                        this.OnUpdatePlayer(playerControlStates.zepetoPlayer, playerControlStates.playerState);
                         //console.log(temp);
                     }                    
                     jumpTrigger.OnChange += (changeVlaues) => this.HandleJumpCounter(playerControlStates.jumpCounter);
@@ -248,31 +257,33 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         }
 
         let join = new Map<string, Player>();
-        let leave = [...this.curPlayerSessionIds];
+        // let leave = [...this.curPlayerSessionIds];
+        let leave = [...this.curPlayerControlStates.keys()];
 
         state.players.ForEach((sessionId: string, player: Player) => {
-            if (!this.curPlayerSessionIds.includes(sessionId)) {
+            if (!this.curPlayerControlStates.has(sessionId)) {
                 join.set(sessionId, player);
             }
             if(leave.length>0) leave[leave.indexOf(sessionId)] = '';//leave.delete(sessionId);
         });
 
-        const prevPlayerCount = this.curPlayerControlStates.size;
+        //const prevPlayerCount = this.curPlayerControlStates.size;
         // [RoomState] Create a player instance for players that enter the Room
         join.forEach((player: Player, sessionId: string) => this.OnJoinPlayer(sessionId, player, state.selfieIKs.get_Item(sessionId)));
-        if(join.size>0 && prevPlayerCount + join.size === this.curPlayerControlStates.size)
-            this.curPlayerSessionIds.push(...join.keys());
+        // if(join.size>0 && prevPlayerCount + join.size === this.curPlayerControlStates.size)
+        //     // this.curPlayerSessionIds.push(...join.keys());
+        //     this.curPlayerSessionIds = [...this.curPlayerControlStates.keys()];
 
         // [RoomState] Remove the player instance for players that exit the room
         //leave.forEach((player: Player, sessionId: string) => this.OnLeavePlayer(sessionId, player));
         leave = leave.filter((sessionId) => sessionId !== '');
         leave.forEach((sessionId:string)=>this.OnLeavePlayer(sessionId));
-        if(leave.length > 0)
-            this.curPlayerSessionIds = [...this.curPlayerControlStates.keys()];
+        // if(leave.length > 0)
+        //     this.curPlayerSessionIds = [...this.curPlayerControlStates.keys()];
     }
 
     private OnJoinPlayer(sessionId: string, player: Player, selfieIK:SelfieIK) {
-        if(!selfieIK) return;
+        if(!player || !selfieIK) return;
 
         console.log(`[OnJoinPlayer] players - sessionId : ${sessionId}`);
         // this.currentPlayers.set(sessionId, player);
@@ -318,11 +329,16 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         // if(sessionId !== this.room.SessionId) this.clientIKManager.DeletePlayerIK(sessionId);
 
         ZepetoPlayers.instance.RemovePlayer(sessionId);
-
+        const state = this.curPlayerControlStates.get(sessionId);
+        // state.playerState.OnChange = null;
+        // delete state.jumpCounter;
+        // delete state.playerState;
+        // delete state.zepetoPlayer;
+        // delete state.selfieIK;
         this.curPlayerControlStates.delete(sessionId);
     }
 
-    private OnUpdatePlayer(zepetoPlayer: ZepetoPlayer, player: Player,jumpCounter:Counter ) {
+    private OnUpdatePlayer(zepetoPlayer: ZepetoPlayer, player: Player) {
 
         const position = ClientStarterV2.ParseVector3(player.transform.position);
         const rotation = ClientStarterV2.ParseVector3(player.transform.rotation);
@@ -333,21 +349,25 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
 
         // 동기화2
         const curSpeed = zepetoPlayer.character.characterController.velocity.magnitude;
-        const moveDelta = moveDir.magnitude;
+        let moveDelta = moveDir.magnitude;
 
         if(curSpeed === 0 && this.stopPlayerStates.includes(player.state)) {
             zepetoPlayer.character.StopMoving();
             zepetoPlayer.character.transform.position = position;
+            moveDelta = 0;
             if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation.eulerAngles = rotation;
         }
         
         if (moveDelta < 0.05 && this.stopPlayerStates.includes(player.state)) {
+        // if (moveDelta < 0.05) {
+            // if (player.state === CharacterState.MoveTurn)
+            //     return;
             zepetoPlayer.character.StopMoving();
         } else {
             zepetoPlayer.character.MoveContinuously(moveDir);
         }
 
-        //console.log(`[UpdatePlayer]${moveDelta}/${curSpeed}/${this.characterStateMap.get(player.state)}`);
+        console.log(`[UpdatePlayer]${player.sessionId}: ${moveDelta}/${curSpeed}/${this.characterStateMap.get(player.state)}`);
     }
 
     private HandleJumpCounter(jumpCounter: Counter) {
@@ -392,7 +412,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
     }
 
     private SetLookAtPlayerInstance(character:ZepetoCharacter, selfieIK:SelfieIK) {
-        if(!selfieIK) return;
+        if(!(selfieIK && selfieIK.isSelfie)) return;
 
         const lookAtVector = ClientStarterV2.ParseVector3(selfieIK.lookAt);
 
@@ -403,12 +423,16 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
     }
 
     private* HandlePlayerInstances() {
-        this.curPlayerControlStates.forEach((controlStates:PlayerControlState, sessionId:string)=>{
-            if(controlStates.isLoaded || !controlStates.isLoaded || !controlStates.zepetoPlayer) return;
-            // 점프하기
-            this.SetJumpPlayerInstance(controlStates.zepetoPlayer.character, controlStates.jumpCounter);
-            this.SetLookAtPlayerInstance(controlStates.zepetoPlayer.character, controlStates.selfieIK);
-        });
+        while(true) {
+            this.curPlayerControlStates.forEach((controlStates:PlayerControlState, sessionId:string)=>{
+                if(controlStates.isLocal || !controlStates.isLoaded || !controlStates.zepetoPlayer) return;
+                
+                // this.OnUpdatePlayer(controlStates.zepetoPlayer, controlStates.playerState);
+                this.SetJumpPlayerInstance(controlStates.zepetoPlayer.character, controlStates.jumpCounter);
+                this.SetLookAtPlayerInstance(controlStates.zepetoPlayer.character, controlStates.selfieIK);
+            });
+            yield null;
+        }
     }
 
     // private OnJumpPlayer(character: ZepetoCharacter, jumpCounter:Counter, curState:CharacterState, prevState:CharacterState) {
@@ -477,7 +501,8 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         rot.Add("z", transform.localEulerAngles.z);
         data.Add("rotation", rot.GetObject());
 
-        data.Add("expectedState", state);
+        //data.Add("expectedState", state);
+
         this.room.Send("onChangedTransform", data.GetObject());
     }
 
