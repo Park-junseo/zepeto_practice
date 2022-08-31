@@ -483,14 +483,14 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         }
     }
 
-    private SetLookAtPlayerInstance({zepetoPlayer, selfieIK}:PlayerControlState) {
+    private SetSelfiePlayerInstance({zepetoPlayer, selfieIK}:PlayerControlState) {
         if(!(selfieIK && selfieIK.isSelfie)) return;
 
         const lookAtVector = ClientStarterV2.ParseVector3(selfieIK.lookAt);
         const character = zepetoPlayer.character;
         // character.transform.rotation.SetLookRotation(lookAtVector);// = lookAtVector;// = Quaternion.Euler(lookAtVector);
         character.transform.LookAt(lookAtVector);
-        character.transform.eulerAngles = new UnityEngine.Vector3(0, character.transform.eulerAngles.y, 0);
+        character.transform.eulerAngles = UnityEngine.Vector3.op_Addition(new UnityEngine.Vector3(0, character.transform.eulerAngles.y, 0), ScreenShotModeManager.GetInstance().fixSelfieBodyRotation);
         //console.log(`${sessionId}: ${character.transform.rotation.eulerAngles.ToString()}`);
     }
 
@@ -501,7 +501,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                 
                 // this.OnUpdatePlayer(controlStates.zepetoPlayer, controlStates.playerState);
                 this.SetJumpPlayerInstance(controlStates);
-                this.SetLookAtPlayerInstance(controlStates);
+                this.SetSelfiePlayerInstance(controlStates);
             });
             yield null;
         }
