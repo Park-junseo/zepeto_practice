@@ -1,4 +1,4 @@
-import { ZepetoPlayers } from 'ZEPETO.Character.Controller';
+import { ZepetoPlayer, ZepetoPlayers } from 'ZEPETO.Character.Controller';
 import { ZepetoScriptBehaviour } from 'ZEPETO.Script'
 import ScreenShotModeManager from '../ScreenShotScripts/ScreenShotModeManager';
 import ClientStarterV2 from './ClientStarterV2';
@@ -10,22 +10,29 @@ export default class PlayerIKController extends ZepetoScriptBehaviour {
     private selfieIK:SelfieIK;
     private sessionId:string;
     private animator:UnityEngine.Animator;
+    private zepetoPlayer:ZepetoPlayer
+
+    private selfieStick: UnityEngine.GameObject;
 
     Awake() {
         this.animator = this.GetComponent<UnityEngine.Animator>();
     }
 
     Start() {    
-
+        ScreenShotModeManager.GetInstance().SetPlayerLayer(this.zepetoPlayer.character);
+        this.selfieStick = ScreenShotModeManager.GetInstance().SetSelfieHand(this.zepetoPlayer.character, this.selfieStick);
     }
 
     OnAnimatorIK () {
-        this.StartAnimatorIK();
+        this.StartSelfieIK();
     }
 
-    StartAnimatorIK() {
-        if(!this.selfieIK?.isSelfie) return;
-
+    StartSelfieIK() {
+        if(!this.selfieIK?.isSelfie) {
+            this.selfieStick.SetActive(false);
+            return;
+        }
+        this.selfieStick.SetActive(true);
         const bodyWeight = ScreenShotModeManager.GetInstance().GetIKController().bodyWeight;
         const headWeight = ScreenShotModeManager.GetInstance().GetIKController().headWeight;
 
@@ -39,7 +46,8 @@ export default class PlayerIKController extends ZepetoScriptBehaviour {
         this.animator.SetIKPosition(UnityEngine.AvatarIKGoal.RightHand, targetAtVector);
     }
 
-    public Init(selfieIK:SelfieIK){
+    public Init(zepetoPlayer:ZepetoPlayer, selfieIK:SelfieIK){
+        this.zepetoPlayer = zepetoPlayer;
         this.selfieIK = selfieIK;
     }
 

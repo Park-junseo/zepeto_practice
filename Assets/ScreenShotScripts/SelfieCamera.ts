@@ -73,19 +73,19 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
         let newRot: Quaternion = Quaternion.Euler(this.rotateY, this.rotateX, 0);
         this.targetLookAt.rotation = Quaternion.Slerp(this.targetLookAt.rotation, newRot, this.smoothCameraRotation * Time.deltaTime);
 
-        var camDir: Vector3 = (this.targetLookAt.forward * -1) + (this.targetLookAt.right * this.rightOffset);
+        var camDir: Vector3 = Vector3.op_Addition(Vector3.op_Multiply(this.targetLookAt.forward,-1),Vector3.op_Multiply(this.targetLookAt.right,this.rightOffset));
         camDir = camDir.normalized;
 
         var targetPos = new Vector3(this.currentTarget.position.x, this.currentTarget.position.y, this.currentTarget.position.z);
         this.currentTargetPos = targetPos;
 
-        this.currentPos = this.currentTargetPos + new Vector3(0, this.height, 0);
+        this.currentPos = Vector3.op_Addition(this.currentTargetPos,new Vector3(0, this.height, 0));
 
         this.targetLookAt.position = this.currentPos;
-        this.transform.position = this.currentPos + (camDir * this.distance);
+        this.transform.position = Vector3.op_Addition(this.currentPos,Vector3.op_Multiply(camDir,this.distance)) ;
 
-        var lookPoint: Vector3 = this.currentPos + this.targetLookAt.forward * 2;
-        lookPoint = lookPoint + (this.targetLookAt.right * Vector3.Dot(camDir * (this.distance), this.targetLookAt.right));
+        var lookPoint: Vector3 = Vector3.op_Addition(this.currentPos,Vector3.op_Multiply(this.targetLookAt.forward,2)) ;
+        lookPoint = Vector3.op_Addition(lookPoint,Vector3.op_Multiply(this.targetLookAt.right,Vector3.Dot(Vector3.op_Multiply(camDir,(this.distance)), this.targetLookAt.right)));
 
 
         let subtractionVec = new Vector3(lookPoint.x - this.transform.position.x,
@@ -98,10 +98,10 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
         //this.currentTarget.LookAt(this.transform);
         //this.currentTarget.eulerAngles = new Vector3(0, this.currentTarget.eulerAngles.y, 0);
         
-        var lookAxisRot = Quaternion.LookRotation(subtractionVec*-1);
+        var lookAxisRot = Quaternion.LookRotation(Vector3.op_Multiply(subtractionVec,-1));
         var projRot = Vector3.ProjectOnPlane(lookAxisRot.eulerAngles, Vector3.right);
 
-        this.currentTarget.rotation = Quaternion.Euler(projRot + this.fixBodyRotation);
+        this.currentTarget.rotation = Quaternion.Euler(Vector3.op_Addition(projRot,this.fixBodyRotation));
 
         //console.log(`[SelfieCamera] ${this.currentTarget.rotation.eulerAngles.ToString()}`)
 
@@ -265,7 +265,7 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
             // ZepetoPlayers.instance.characterData.runSpeed = this.initialRunSpeed;
             // ZepetoPlayers.instance.motionV2Data.jumpDashSpeedThreshold = this.initialJumpDashSpeedThreshold;
 
-            this.currentTarget.rotation = Quaternion.Euler(this.currentTarget.eulerAngles - this.fixBodyRotation);
+            this.currentTarget.rotation = Quaternion.Euler(Vector3.op_Subtraction(this.currentTarget.eulerAngles,this.fixBodyRotation));
         }
 
         if(this.zepetoCharacter) this.zepetoCharacter.ZepetoAnimator.SetBool("SelfieMode", active);

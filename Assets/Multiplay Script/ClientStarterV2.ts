@@ -10,13 +10,29 @@ import ClientIKManager from './ClientIKManager'
 import ScreenShotModeManager from '../ScreenShotScripts/ScreenShotModeManager'
 import PlayerIKController from './PlayerIKController'
 
-type PlayerStatus = {
+// type PlayerStatus = {
+//     state: CharacterState;
+//     position: UnityEngine.Vector3;
+//     rotation: UnityEngine.Quaternion;
+
+//     landingPosition?: UnityEngine.Vector3;
+//     landingRotation?: UnityEngine.Quaternion;
+// }
+
+class PlayerStatus {
+    constructor(s:CharacterState, p:UnityEngine.Vector3, r:UnityEngine.Vector3) {
+        this.UpdateForm(s,p,r);
+    }
+
+    public UpdateForm(s:CharacterState, p:UnityEngine.Vector3, r:UnityEngine.Vector3) {
+        this.state = s;
+        this.position = p;
+        this.rotation = r;
+    }
+
     state: CharacterState;
     position: UnityEngine.Vector3;
-    rotation: UnityEngine.Quaternion;
-
-    landingPosition?: UnityEngine.Vector3;
-    landingRotation?: UnityEngine.Quaternion;
+    rotation: UnityEngine.Vector3;
 }
 
 type Counter = {
@@ -54,6 +70,9 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
 
     // action
     private jumpCountHandler: number;
+
+    private readonly tickSize = 0.04;
+    private readonly updateTickSize = this.tickSize*10;
 
     private characterStateMap = new Map<CharacterState,string>([
         [0,"Invalid"],
@@ -115,7 +134,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
             room.OnStateChange += this.OnStateChange;
         };
 
-        this.StartCoroutine(this.SendMessageLoop(0.04));
+        this.StartCoroutine(this.SendMessageLoop(this.tickSize));
         this.StartCoroutine(this.CheckValidControl(1.0));
         this.StartCoroutine(this.HandlePlayerInstances());
         //this.StartCoroutine(this.FixRotation());
@@ -145,6 +164,8 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
             }
         }
 
+        // character.additionalRunSpeed -= 3;
+
         let haveToSendisActiveSelfie = true;
         let prevState = character.CurrentState;
         while (true) {
@@ -156,6 +177,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                 //     this.SendTransform(character.transform, character.CurrentState);
                 //     // this.SendState(character.CurrentState);
                 // }
+                
                 this.SendTransform(character.transform, character.CurrentState);
                 this.SendState(character.CurrentState);
                 prevState = character.CurrentState;
@@ -231,8 +253,14 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                     // const jumpCounter = this.curPlayersJumpCounter.get(sessionId);
 
                     // [RoomState] Called whenever the state of the player instance is updated. 
+                    const prevPlayerStatus:PlayerStatus = new PlayerStatus(
+                        playerControlStates.zepetoPlayer.character.CurrentState,
+                        playerControlStates.zepetoPlayer.character.transform.position,
+                        playerControlStates.zepetoPlayer.character.transform.rotation.eulerAngles
+                    );
+
                     playerControlStates.playerState.OnChange += (changeValues) => {
-                        this.OnUpdatePlayer(playerControlStates.zepetoPlayer, playerControlStates.playerState);
+                        this.OnUpdatePlayer(playerControlStates.zepetoPlayer, playerControlStates.playerState, prevPlayerStatus);
                         //console.log(temp);
                     }                    
                     jumpTrigger.OnChange += (changeVlaues) => this.HandleJumpCounter(playerControlStates.jumpCounter);
@@ -249,7 +277,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                     //     this.OnJumpPlayer(zepetoPlayer.character, jumpCounter, cur, prev)
                     // });
 
-                    playerControlStates.zepetoPlayer.character.ZepetoAnimator.gameObject.AddComponent<PlayerIKController>().Init(playerControlStates.selfieIK);
+                    playerControlStates.zepetoPlayer.character.ZepetoAnimator.gameObject.AddComponent<PlayerIKController>().Init(playerControlStates.zepetoPlayer, playerControlStates.selfieIK);
 
                 } 
                 
@@ -338,34 +366,70 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         this.curPlayerControlStates.delete(sessionId);
     }
 
-    private OnUpdatePlayer(zepetoPlayer: ZepetoPlayer, player: Player) {
+    private OnUpdatePlayer(zepetoPlayer: ZepetoPlayer, player: Player, $prevStatus: PlayerStatus) {
 
         const position = ClientStarterV2.ParseVector3(player.transform.position);
         const rotation = ClientStarterV2.ParseVector3(player.transform.rotation);
 
-        var moveDir = UnityEngine.Vector3.op_Subtraction(position, zepetoPlayer.character.transform.position);
-        moveDir = new UnityEngine.Vector3(moveDir.x, 0, moveDir.z);
+        const character = zepetoPlayer.character;
 
+        // // 동기화1(점프)
+        // if(zepetoPlayer.character.CurrentState === CharacterState.Jump && $prevStatus.state === CharacterState.Jump) {
+        //     zepetoPlayer.character.transform.position = $prevStatus.position;
+        //     if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = UnityEngine.Quaternion.Euler($prevStatus.rotation);
+        // }
+        // 동기화1(점프)
+        // if(player.state === CharacterState.Jump && $prevStatus.state !== CharacterState.Jump) {
+        //     zepetoPlayer.character.transform.position = $prevStatus.position;
+        //     if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = UnityEngine.Quaternion.Euler($prevStatus.rotation);
+        // }
+
+        var moveDir = UnityEngine.Vector3.op_Subtraction(position, character.transform.position);
+        // moveDir = UnityEngine.Vector3.op_Multiply(new UnityEngine.Vector3(moveDir.x, 0, moveDir.z), 1);
+        //moveDir = new UnityEngine.Vector3(moveDir.x, 0, moveDir.z);
+
+        // if(position.x === $prevStatus.position.x && position.z === $prevStatus.position.z) {
+        //     moveDir.x = 0;
+        //     moveDir.z = 0;
+        // }
 
         // 동기화2
-        const curSpeed = zepetoPlayer.character.characterController.velocity.magnitude;
+        const curSpeed = character.characterController.velocity.magnitude;
         let moveDelta = moveDir.magnitude;
 
-        if(curSpeed === 0 && this.stopPlayerStates.includes(player.state)) {
-            zepetoPlayer.character.StopMoving();
-            zepetoPlayer.character.transform.position = position;
+        const minSpeed = moveDelta/this.updateTickSize;
+
+        if(curSpeed < minSpeed && this.stopPlayerStates.includes(player.state)) {
+            character.StopMoving();
+            // if(character.transform.position.y !== position.y) {
+            //     character.transform.position = position;
+            //     moveDelta = 0;
+            // }
+            character.transform.position = position;
             moveDelta = 0;
-            if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation.eulerAngles = rotation;
+            if(!player.isSelfieIK) character.transform.rotation = UnityEngine.Quaternion.Euler(rotation);
         }
+
+        // if(this.stopPlayerStates.includes($prevStatus.state) && !this.stopPlayerStates.includes(player.state)) {
+        //     zepetoPlayer.character.transform.position = $prevStatus.position;
+        //     if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = UnityEngine.Quaternion.Euler($prevStatus.rotation);
+        // }
         
-        if (moveDelta < 0.05 && this.stopPlayerStates.includes(player.state)) {
+        if (moveDelta < 0.02 && this.stopPlayerStates.includes(player.state)) {
         // if (moveDelta < 0.05) {
             // if (player.state === CharacterState.MoveTurn)
             //     return;
-            zepetoPlayer.character.StopMoving();
-        } else {
-            zepetoPlayer.character.MoveContinuously(moveDir);
+            character.StopMoving();
+        } else if(player.state !== CharacterState.MoveTurn) {
+            moveDir.y = 0;
+            character.MoveContinuously(moveDir);
         }
+
+        $prevStatus.UpdateForm(
+            player.state,
+            position,
+            rotation
+        );
 
         console.log(`[UpdatePlayer]${player.sessionId}: ${moveDelta}/${curSpeed}/${this.characterStateMap.get(player.state)}`);
     }
@@ -400,22 +464,30 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
     //     // });
     // }
 
-    private SetJumpPlayerInstance(character:ZepetoCharacter, jumpCounter: Counter) {
+    // private SetJumpPlayerInstance(zepetoPlayer:ZepetoPlayer, jumpCounter: Counter) {
+    private SetJumpPlayerInstance({zepetoPlayer, jumpCounter}:PlayerControlState) {
         if(!jumpCounter) return;
 
         if(jumpCounter.value > 0) {
+            const character = zepetoPlayer.character;
             if(!this.unableJumpStates.includes(character.CurrentState)) {
+                // const position = ClientStarterV2.ParseVector3(playerState.transform.position);
+                // const rotation = ClientStarterV2.ParseVector3(playerState.transform.rotation);
+
+                // character.transform.position = position;
+                // character.transform.rotation = UnityEngine.Quaternion.Euler(rotation);
+
                 character.Jump();
                 jumpCounter.value -= 1;
             }
         }
     }
 
-    private SetLookAtPlayerInstance(character:ZepetoCharacter, selfieIK:SelfieIK) {
+    private SetLookAtPlayerInstance({zepetoPlayer, selfieIK}:PlayerControlState) {
         if(!(selfieIK && selfieIK.isSelfie)) return;
 
         const lookAtVector = ClientStarterV2.ParseVector3(selfieIK.lookAt);
-
+        const character = zepetoPlayer.character;
         // character.transform.rotation.SetLookRotation(lookAtVector);// = lookAtVector;// = Quaternion.Euler(lookAtVector);
         character.transform.LookAt(lookAtVector);
         character.transform.eulerAngles = new UnityEngine.Vector3(0, character.transform.eulerAngles.y, 0);
@@ -428,8 +500,8 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                 if(controlStates.isLocal || !controlStates.isLoaded || !controlStates.zepetoPlayer) return;
                 
                 // this.OnUpdatePlayer(controlStates.zepetoPlayer, controlStates.playerState);
-                this.SetJumpPlayerInstance(controlStates.zepetoPlayer.character, controlStates.jumpCounter);
-                this.SetLookAtPlayerInstance(controlStates.zepetoPlayer.character, controlStates.selfieIK);
+                this.SetJumpPlayerInstance(controlStates);
+                this.SetLookAtPlayerInstance(controlStates);
             });
             yield null;
         }

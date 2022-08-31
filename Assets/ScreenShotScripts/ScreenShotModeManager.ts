@@ -1,5 +1,5 @@
 import { Animator, Camera, GameObject, Quaternion, Renderer, Transform, Vector3, Vector2 } from 'UnityEngine';
-import { ZepetoPlayer, ZepetoPlayers } from 'ZEPETO.Character.Controller';
+import { ZepetoCharacter, ZepetoPlayer, ZepetoPlayers } from 'ZEPETO.Character.Controller';
 import { ZepetoScriptBehaviour } from 'ZEPETO.Script'
 import IKController from './IKController';
 import ScreenShotController from './ScreenShotController';
@@ -22,14 +22,14 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     private _isActiveSelfie: boolean = false;
 
     public selfieStickPrefab: GameObject;
-    private selfieStick: GameObject;
+    private selfieStick: GameObject = undefined;
 
     // private lookAtTransform: Transform;
     // private targetTransform: Transform;
 
     // Data
     private playerLayer: number = 21;
-    private rightHandBone :string = "hand_R";
+    private _rightHandBone :string = "hand_R";
 
     Awake() {
         ScreenShotModeManager.Instance = this;
@@ -43,11 +43,14 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
             this.localPlayer = ZepetoPlayers.instance.LocalPlayer.zepetoPlayer;
             this.zepetoCamera = ZepetoPlayers.instance.LocalPlayer.zepetoCamera.camera;
 
-            if(this.localPlayer.character.gameObject.layer != this.playerLayer) {
-                this.localPlayer.character.GetComponentsInChildren<Transform>().forEach((characterObj) => {
-                    characterObj.gameObject.layer = this.playerLayer;
-                });
-            }      
+            // if(this.localPlayer.character.gameObject.layer != this.playerLayer) {
+            //     this.localPlayer.character.GetComponentsInChildren<Transform>().forEach((characterObj) => {
+            //         characterObj.gameObject.layer = this.playerLayer;
+            //     });
+            // }   
+            this.SetPlayerLayer(this.localPlayer.character);
+            // this.SetSelfieHand(this.localPlayer.character, this.selfieStick);
+
             
             if(!this.iKController) {
                 let playerAnimator = this.localPlayer.character.gameObject.GetComponentInChildren<Animator>();
@@ -80,19 +83,47 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         this.iKController.SetTargetAndGrip(this.selfieCamera.transform, grip.transform, character.transform);
 
         // 3. Fix the selfie stick on the character's right hand
-        this.selfieStick = this.selfieStick || GameObject.Instantiate<GameObject>(this.selfieStickPrefab);
-        this.localPlayer.character.GetComponentsInChildren<Transform>().forEach((characterObj) => {
-            if(characterObj.name == this.rightHandBone) {
-                this.selfieStick.transform.parent = characterObj;
-                this.selfieStick.transform.localPosition = Vector3.zero;
-                this.selfieStick.transform.localRotation = Quaternion.Euler(Vector3.zero);
-                this.selfieStick.GetComponentInChildren<Renderer>().gameObject.layer = this.playerLayer;
-            }
-        });
+        // this.selfieStick = this.selfieStick || GameObject.Instantiate<GameObject>(this.selfieStickPrefab);
+        // this.localPlayer.character.GetComponentsInChildren<Transform>().forEach((characterObj) => {
+        //     if(characterObj.name == this._rightHandBone) {
+        //         this.selfieStick.transform.parent = characterObj;
+        //         this.selfieStick.transform.localPosition = Vector3.zero;
+        //         this.selfieStick.transform.localRotation = Quaternion.Euler(Vector3.zero);
+        //         this.selfieStick.GetComponentInChildren<Renderer>().gameObject.layer = this.playerLayer;
+        //     }
+        // });
+        this.selfieStick = this.SetSelfieHand(this.localPlayer.character, this.selfieStick);
+        console.log(`[SetSelfieHand] ${this.selfieStick?.name}`)
         // 4. Initialize the zepetoCamera
         //this.SetZepetoCameraMode();
 
         this.screenShot.GetUIController().SettingScreenShotMode();
+    }
+
+    public SetPlayerLayer (character:ZepetoCharacter) {
+        if(character.gameObject.layer != this.playerLayer) {
+            character.GetComponentsInChildren<Transform>().forEach((characterObj) => {
+                characterObj.gameObject.layer = this.playerLayer;
+            });
+        }   
+    }
+
+    public SetSelfieHand(character:ZepetoCharacter, selfieStick: GameObject) :GameObject {
+        if(!character) return;
+
+        selfieStick = selfieStick || GameObject.Instantiate<GameObject>(this.selfieStickPrefab);
+        
+        character.GetComponentsInChildren<Transform>().forEach((characterObj) => {
+            if(characterObj.name == this._rightHandBone) {
+                selfieStick.transform.parent = characterObj;
+                selfieStick.transform.localPosition = Vector3.zero;
+                selfieStick.transform.localRotation = Quaternion.Euler(Vector3.zero);
+                selfieStick.GetComponentInChildren<Renderer>().gameObject.layer = this.playerLayer;
+                selfieStick.SetActive(false);
+            }
+        });
+
+        return selfieStick;
     }
 
    
@@ -194,4 +225,6 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     public GetIKController() { return this.iKController; }
 
     public get isActiveSelfie() { return this._isActiveSelfie; }
+
+    public get rightHandBone() {return this._rightHandBone;}
 }
