@@ -27,6 +27,7 @@ declare module "ZEPETO.Multiplay.Schema" {
 		state: number;
 		subState: number;
 		expectedState: number;
+		isSelfieIK: boolean;
 	}
 	class Action extends Schema {
 		jumpTrigger: boolean;

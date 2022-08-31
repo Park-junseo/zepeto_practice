@@ -19,15 +19,47 @@ ScriptedImporter:
   WrapperFilters: []
   wrapperOutputDirectory: Generated
   compiledResult: '{"source":"\"use strict\";\r\nObject.defineProperty(exports, \"__esModule\",
-    { value: true });\r\nconst ZEPETO_Multiplay_Schema_1 = require(\"ZEPETO.Multiplay.Schema\");\r\nconst
-    ZEPETO_Script_1 = require(\"ZEPETO.Script\");\r\nclass ClientIKManager extends
-    ZEPETO_Script_1.ZepetoScriptBehaviour {\r\n    constructor() {\r\n        super(...arguments);\r\n       
-    this.curPlayersIK = new Map();\r\n    }\r\n    Start() {\r\n    }\r\n    OnAnimatorIK()
-    {\r\n    }\r\n    LateUpdate() {\r\n    }\r\n    AddPlayerIK(sessionId, selfieIK)
-    {\r\n        if (!selfieIK)\r\n            selfieIK = new ZEPETO_Multiplay_Schema_1.SelfieIK();\r\n       
-    this.curPlayersIK.set(sessionId, selfieIK);\r\n    }\r\n    DeletePlayerIK(sessionId)
-    {\r\n        this.curPlayersIK.delete(sessionId);\r\n    }\r\n}\r\nexports.default
-    = ClientIKManager;\r\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ2xpZW50SUtNYW5hZ2VyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiQ2xpZW50SUtNYW5hZ2VyLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUEscUVBQW1EO0FBQ25ELGlEQUFxRDtBQUVyRCxNQUFxQixlQUFnQixTQUFRLHFDQUFxQjtJQUFsRTs7UUFFWSxpQkFBWSxHQUF5QixJQUFJLEdBQUcsRUFBb0IsQ0FBQztJQXVCN0UsQ0FBQztJQXJCRyxLQUFLO0lBRUwsQ0FBQztJQUVELFlBQVk7SUFFWixDQUFDO0lBRUQsVUFBVTtJQUVWLENBQUM7SUFFTSxXQUFXLENBQUMsU0FBZ0IsRUFBRSxRQUFtQjtRQUNwRCxJQUFJLENBQUMsUUFBUTtZQUFFLFFBQVEsR0FBRyxJQUFJLGtDQUFRLEVBQUUsQ0FBQztRQUN6QyxJQUFJLENBQUMsWUFBWSxDQUFDLEdBQUcsQ0FBQyxTQUFTLEVBQUUsUUFBUSxDQUFDLENBQUM7SUFDL0MsQ0FBQztJQUVNLGNBQWMsQ0FBQyxTQUFnQjtRQUNsQyxJQUFJLENBQUMsWUFBWSxDQUFDLE1BQU0sQ0FBQyxTQUFTLENBQUMsQ0FBQztJQUN4QyxDQUFDO0NBRUo7QUF6QkQsa0NBeUJDIn0=","assetPath":"Assets/Multiplay
+    { value: true });\r\nconst UnityEngine = require(\"UnityEngine\");\r\nconst ZEPETO_Character_Controller_1
+    = require(\"ZEPETO.Character.Controller\");\r\nconst ZEPETO_Script_1 = require(\"ZEPETO.Script\");\r\nconst
+    ScreenShotModeManager_1 = require(\"../ScreenShotScripts/ScreenShotModeManager\");\r\nconst
+    ClientStarterV2_1 = require(\"./ClientStarterV2\");\r\nclass ClientIKManager
+    extends ZEPETO_Script_1.ZepetoScriptBehaviour {\r\n    constructor() {\r\n       
+    super(...arguments);\r\n        this.curPlayersIK = new Map();\r\n    }\r\n   
+    Start() {\r\n        this.StartCoroutine(this.FixSelfieRotation());\r\n    }\r\n   
+    // OnAnimatorIK() {\r\n    //     const bodyWeight = ScreenShotModeManager.GetInstance().GetIKController().bodyWeight;\r\n   
+    //     const headWeight = ScreenShotModeManager.GetInstance().GetIKController().headWeight;\r\n   
+    //     this.curPlayersIK.forEach((selfieIK:SelfieIK, sessionId:string)=>{\r\n   
+    //         if(!selfieIK.isSelfie || !ZepetoPlayers.instance.HasPlayer(sessionId))
+    return;\r\n    //         console.log(`${sessionId} ik: ${selfieIK.isSelfie}`);\r\n   
+    //         const character = ZepetoPlayers.instance.GetPlayer(sessionId).character;\r\n   
+    //         const targetAtVector = ClientStarterV2.ParseVector3(selfieIK.targetAt);\r\n   
+    //         const lookAtVector = ClientStarterV2.ParseVector3(selfieIK.lookAt);\r\n   
+    //         character.ZepetoAnimator.SetLookAtWeight(1, bodyWeight, headWeight);\r\n   
+    //         character.ZepetoAnimator.SetLookAtPosition(lookAtVector);\r\n    //        
+    character.ZepetoAnimator.SetIKPositionWeight(UnityEngine.AvatarIKGoal.RightHand,
+    1);\r\n    //         character.ZepetoAnimator.SetIKPosition(UnityEngine.AvatarIKGoal.RightHand,
+    targetAtVector);\r\n    //     });\r\n    // }\r\n    *FixSelfieRotation() {\r\n       
+    while (true) {\r\n            this.curPlayersIK.forEach((selfieIK, sessionId)
+    => {\r\n                if (selfieIK.isSelfie && ZEPETO_Character_Controller_1.ZepetoPlayers.instance.HasPlayer(sessionId))
+    {\r\n                    const character = ZEPETO_Character_Controller_1.ZepetoPlayers.instance.GetPlayer(sessionId).character;\r\n                   
+    const lookAtVector = ClientStarterV2_1.default.ParseVector3(selfieIK.lookAt);\r\n                   
+    // character.transform.rotation.SetLookRotation(lookAtVector);// = lookAtVector;//
+    = Quaternion.Euler(lookAtVector);\r\n                    character.transform.LookAt(lookAtVector);\r\n                   
+    character.transform.eulerAngles = new UnityEngine.Vector3(0, character.transform.eulerAngles.y,
+    0);\r\n                    //console.log(`${sessionId}: ${character.transform.rotation.eulerAngles.ToString()}`);\r\n               
+    }\r\n            });\r\n            yield null;\r\n        }\r\n    }\r\n   
+    // LateUpdate() {\r\n    //     this.curPlayersIK.forEach((selfieIK:SelfieIK,
+    sessionId:string)=>{\r\n    //         if(!selfieIK.isSelfie || !ZepetoPlayers.instance.HasPlayer(sessionId))
+    return;\r\n    //         const character = ZepetoPlayers.instance.GetPlayer(sessionId).character;\r\n   
+    //         const lookAtVector = ClientStarterV2.ParseVector3(selfieIK.lookAt);\r\n   
+    //         //character.transform.rotation.SetLookRotation(lookAtVector);// =
+    lookAtVector;// = Quaternion.Euler(lookAtVector);\r\n    //         character.transform.LookAt(lookAtVector);\r\n   
+    //         character.transform.eulerAngles = new UnityEngine.Vector3(0, character.transform.eulerAngles.y,
+    0);\r\n    //         console.log(`${sessionId}: ${character.transform.rotation.eulerAngles.ToString()}`);\r\n   
+    //     });\r\n    // }\r\n    AddPlayerIK(sessionId, selfieIK) {\r\n        this.curPlayersIK.set(sessionId,
+    selfieIK);\r\n        console.log(`${sessionId} ik: ${this.curPlayersIK.size}`);\r\n   
+    }\r\n    DeletePlayerIK(sessionId) {\r\n        this.curPlayersIK.delete(sessionId);\r\n   
+    }\r\n}\r\nexports.default = ClientIKManager;\r\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ2xpZW50SUtNYW5hZ2VyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiQ2xpZW50SUtNYW5hZ2VyLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUEsMkNBQTJDO0FBQzNDLDZFQUE0RDtBQUU1RCxpREFBcUQ7QUFDckQsc0ZBQStFO0FBQy9FLHVEQUFnRDtBQUVoRCxNQUFxQixlQUFnQixTQUFRLHFDQUFxQjtJQUFsRTs7UUFFWSxpQkFBWSxHQUF5QixJQUFJLEdBQUcsRUFBb0IsQ0FBQztJQWlFN0UsQ0FBQztJQS9ERyxLQUFLO1FBQ0QsSUFBSSxDQUFDLGNBQWMsQ0FBQyxJQUFJLENBQUMsaUJBQWlCLEVBQUUsQ0FBQyxDQUFDO0lBQ2xELENBQUM7SUFFRCxtQkFBbUI7SUFDbkIsMkZBQTJGO0lBQzNGLDJGQUEyRjtJQUMzRix5RUFBeUU7SUFDekUseUZBQXlGO0lBQ3pGLGdFQUFnRTtJQUNoRSxtRkFBbUY7SUFFbkYsa0ZBQWtGO0lBQ2xGLDhFQUE4RTtJQUU5RSwrRUFBK0U7SUFDL0Usb0VBQW9FO0lBRXBFLCtGQUErRjtJQUMvRixzR0FBc0c7SUFDdEcsVUFBVTtJQUNWLElBQUk7SUFFRyxDQUFFLGlCQUFpQjtRQUN0QixPQUFNLElBQUksRUFDVjtZQUNJLElBQUksQ0FBQyxZQUFZLENBQUMsT0FBTyxDQUFDLENBQUMsUUFBaUIsRUFBRSxTQUFnQixFQUFDLEVBQUU7Z0JBQzdELElBQUcsUUFBUSxDQUFDLFFBQVEsSUFBSSwyQ0FBYSxDQUFDLFFBQVEsQ0FBQyxTQUFTLENBQUMsU0FBUyxDQUFDLEVBQUU7b0JBQ2pFLE1BQU0sU0FBUyxHQUFHLDJDQUFhLENBQUMsUUFBUSxDQUFDLFNBQVMsQ0FBQyxTQUFTLENBQUMsQ0FBQyxTQUFTLENBQUM7b0JBQ3hFLE1BQU0sWUFBWSxHQUFHLHlCQUFlLENBQUMsWUFBWSxDQUFDLFFBQVEsQ0FBQyxNQUFNLENBQUMsQ0FBQztvQkFFbkUsb0hBQW9IO29CQUNwSCxTQUFTLENBQUMsU0FBUyxDQUFDLE1BQU0sQ0FBQyxZQUFZLENBQUMsQ0FBQztvQkFDekMsU0FBUyxDQUFDLFNBQVMsQ0FBQyxXQUFXLEdBQUcsSUFBSSxXQUFXLENBQUMsT0FBTyxDQUFDLENBQUMsRUFBRSxTQUFTLENBQUMsU0FBUyxDQUFDLFdBQVcsQ0FBQyxDQUFDLEVBQUUsQ0FBQyxDQUFDLENBQUM7b0JBQ25HLHNGQUFzRjtpQkFDekY7WUFDTCxDQUFDLENBQUMsQ0FBQztZQUNILE1BQU0sSUFBSSxDQUFDO1NBQ2Q7SUFDTCxDQUFDO0lBRUQsaUJBQWlCO0lBQ2pCLHlFQUF5RTtJQUN6RSx5RkFBeUY7SUFDekYsbUZBQW1GO0lBQ25GLDhFQUE4RTtJQUU5RSw4SEFBOEg7SUFDOUgsb0RBQW9EO0lBQ3BELDhHQUE4RztJQUM5RywrRkFBK0Y7SUFDL0YsVUFBVTtJQUNWLElBQUk7SUFFRyxXQUFXLENBQUMsU0FBZ0IsRUFBRSxRQUFrQjtRQUNuRCxJQUFJLENBQUMsWUFBWSxDQUFDLEdBQUcsQ0FBQyxTQUFTLEVBQUUsUUFBUSxDQUFDLENBQUM7UUFDM0MsT0FBTyxDQUFDLEdBQUcsQ0FBQyxHQUFHLFNBQVMsUUFBUSxJQUFJLENBQUMsWUFBWSxDQUFDLElBQUksRUFBRSxDQUFDLENBQUM7SUFDOUQsQ0FBQztJQUVNLGNBQWMsQ0FBQyxTQUFnQjtRQUNsQyxJQUFJLENBQUMsWUFBWSxDQUFDLE1BQU0sQ0FBQyxTQUFTLENBQUMsQ0FBQztJQUN4QyxDQUFDO0NBRUo7QUFuRUQsa0NBbUVDIn0=","assetPath":"Assets/Multiplay
     Script/ClientIKManager.ts","manifest":{"properties":[],"name":"ClientIKManager","description":""},"isCompiled":true}'
-  typescriptHash: 0526f4e1ab23dea133b99b441d78e47b
+  typescriptHash: 05b4872b1f87ed3c2ab9518c7217c36b
   onlyWriteTrigger: 0

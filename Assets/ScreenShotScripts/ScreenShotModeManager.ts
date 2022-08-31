@@ -19,7 +19,7 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     private selfieCamera: SelfieCamera;
     private zepetoCamera: Camera;
 
-    private _isActiveSelfie: boolean;
+    private _isActiveSelfie: boolean = false;
 
     public selfieStickPrefab: GameObject;
     private selfieStick: GameObject;
@@ -47,7 +47,12 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
                 this.localPlayer.character.GetComponentsInChildren<Transform>().forEach((characterObj) => {
                     characterObj.gameObject.layer = this.playerLayer;
                 });
-            }            
+            }      
+            
+            if(!this.iKController) {
+                let playerAnimator = this.localPlayer.character.gameObject.GetComponentInChildren<Animator>();
+                this.iKController = playerAnimator.gameObject.AddComponent<IKController>();
+            }
         });
     }
 
@@ -62,10 +67,6 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         // 2. SelfieCamera setting
         
         let grip = this.selfieCamera.GetGripObject();
-        if(!this.iKController) {
-            let playerAnimator = this.localPlayer.character.gameObject.GetComponentInChildren<Animator>();
-            this.iKController = playerAnimator.gameObject.AddComponent<IKController>();
-        }
 
         // this.lookAtTransform = this.lookAtTransform || new GameObject("selfieLookAt").transform;
         // this.lookAtTransform.SetPositionAndRotation(this.selfieCamera.transform.position, this.selfieCamera.transform.rotation);
@@ -114,6 +115,8 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
             //ZepetoPlayers.instance.ZepetoCamera.rotation.SetLookRotation(Vector3.zero);
             ZepetoPlayers.instance.ZepetoCamera.cameraParent.rotation = Quaternion.Euler(Vector3.zero);
         }
+
+        this._isActiveSelfie = false;
     }
 
     public GetPlayerLayer(): number {
