@@ -4,6 +4,7 @@ import { EventSystem } from 'UnityEngine.EventSystems';
 import { Position } from 'UnityEngine.UIElements';
 import { CharacterJumpState, CharacterMoveState, CharacterState, PlayerControlMode, ZepetoCharacter, ZepetoPlayerControl, ZepetoPlayers } from 'ZEPETO.Character.Controller';
 import { TransformAccess } from 'UnityEngine.Jobs';
+import ScreenShotModeManager from './ScreenShotModeManager';
 export default class SelfieCamera extends ZepetoScriptBehaviour {
     
     public rightOffset: number = 0.25;
@@ -14,8 +15,6 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
     public yMinLimit: number = -20;
     public yMaxLimit: number = 40;
     public smoothCameraRotation: number = 10;
-
-    public fixBodyRotation: Vector3 = new Vector3(0,0,0);
 
     public grip: GameObject;
     private currentTarget: Transform;
@@ -101,7 +100,7 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
         var lookAxisRot = Quaternion.LookRotation(Vector3.op_Multiply(subtractionVec,-1));
         var projRot = Vector3.ProjectOnPlane(lookAxisRot.eulerAngles, Vector3.right);
 
-        this.currentTarget.rotation = Quaternion.Euler(Vector3.op_Addition(projRot,this.fixBodyRotation));
+        this.currentTarget.rotation = Quaternion.Euler(Vector3.op_Addition(projRot,ScreenShotModeManager.GetInstance().fixSelfieBodyRotation));
 
         //console.log(`[SelfieCamera] ${this.currentTarget.rotation.eulerAngles.ToString()}`)
 
@@ -192,7 +191,7 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
     // }
 
     private* UpdateBeforeIK() {
-        while(true) {
+        while(this.isActive) {
             if (this.currentTarget == null || this.targetLookAt == null)
             return;
             this.CameraInput();
@@ -249,11 +248,11 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
 
                 ZepetoPlayers.instance.controllerData.controlMode = PlayerControlMode.WalkOnly;
 
-                
+                this.StopAllCoroutines();
                 this.StartCoroutine(this.UpdateBeforeIK());
             }
         } else {
-            this.StopAllCoroutines();
+            //this.StopAllCoroutines();
 
             this.zepetoCharacter.SyncStateAnimation();
             // ZepetoPlayers.instance.characterData.runSpeed = this.initialRunSpeed;
@@ -265,7 +264,7 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
             // ZepetoPlayers.instance.characterData.runSpeed = this.initialRunSpeed;
             // ZepetoPlayers.instance.motionV2Data.jumpDashSpeedThreshold = this.initialJumpDashSpeedThreshold;
 
-            this.currentTarget.rotation = Quaternion.Euler(Vector3.op_Subtraction(this.currentTarget.eulerAngles,this.fixBodyRotation));
+            this.currentTarget.rotation = Quaternion.Euler(Vector3.op_Subtraction(this.currentTarget.eulerAngles,ScreenShotModeManager.GetInstance().fixSelfieBodyRotation));
         }
 
         if(this.zepetoCharacter) this.zepetoCharacter.ZepetoAnimator.SetBool("SelfieMode", active);

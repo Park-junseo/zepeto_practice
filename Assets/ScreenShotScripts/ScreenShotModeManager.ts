@@ -31,6 +31,9 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     private playerLayer: number = 21;
     private _rightHandBone :string = "hand_R";
 
+    @SerializeField()
+    private _fixSelfieBodyRotation: Vector3 = new Vector3(0,-30,0);
+
     Awake() {
         ScreenShotModeManager.Instance = this;
     }
@@ -49,6 +52,7 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
             //     });
             // }   
             this.SetPlayerLayer(this.localPlayer.character);
+            this.selfieStick = this.SetSelfieHand(this.localPlayer.character, this.selfieStick);
             // this.SetSelfieHand(this.localPlayer.character, this.selfieStick);
 
             
@@ -92,8 +96,6 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         //         this.selfieStick.GetComponentInChildren<Renderer>().gameObject.layer = this.playerLayer;
         //     }
         // });
-        this.selfieStick = this.SetSelfieHand(this.localPlayer.character, this.selfieStick);
-        console.log(`[SetSelfieHand] ${this.selfieStick?.name}`)
         // 4. Initialize the zepetoCamera
         //this.SetZepetoCameraMode();
 
@@ -227,4 +229,6 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     public get isActiveSelfie() { return this._isActiveSelfie; }
 
     public get rightHandBone() {return this._rightHandBone;}
+
+    public get fixSelfieBodyRotation() {return this._fixSelfieBodyRotation;}
 }
