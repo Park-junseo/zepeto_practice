@@ -110,10 +110,10 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         }   
     }
 
-    public SetSelfieHand(character:ZepetoCharacter, selfieStick: GameObject) :GameObject {
+    public SetSelfieHand(character:ZepetoCharacter, selfieStick: GameObject|undefined) :GameObject {
         if(!character) return;
 
-        selfieStick = selfieStick || GameObject.Instantiate<GameObject>(this.selfieStickPrefab);
+        if(selfieStick === undefined) selfieStick = GameObject.Instantiate<GameObject>(this.selfieStickPrefab);
         
         character.GetComponentsInChildren<Transform>().forEach((characterObj) => {
             if(characterObj.name == this._rightHandBone) {
