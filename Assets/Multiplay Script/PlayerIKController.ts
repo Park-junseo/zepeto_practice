@@ -20,8 +20,8 @@ export default class PlayerIKController extends ZepetoScriptBehaviour {
     }
 
     Start() {    
-        ScreenShotModeManager.GetInstance().SetPlayerLayer(this.zepetoPlayer.character);
-        this.selfieStick = ScreenShotModeManager.GetInstance().SetSelfieHand(this.zepetoPlayer.character, this.selfieStick);
+        ScreenShotModeManager.Instance.SetPlayerLayer(this.zepetoPlayer.character);
+        this.selfieStick = ScreenShotModeManager.Instance.SetSelfieHand(this.zepetoPlayer.character, this.selfieStick);
     }
 
     OnAnimatorIK () {

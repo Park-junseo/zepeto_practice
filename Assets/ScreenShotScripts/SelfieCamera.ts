@@ -100,7 +100,7 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
         var lookAxisRot = Quaternion.LookRotation(Vector3.op_Multiply(subtractionVec,-1));
         var projRot = Vector3.ProjectOnPlane(lookAxisRot.eulerAngles, Vector3.right);
 
-        this.currentTarget.rotation = Quaternion.Euler(Vector3.op_Addition(projRot,ScreenShotModeManager.GetInstance().fixSelfieBodyRotation));
+        this.currentTarget.rotation = Quaternion.Euler(Vector3.op_Addition(projRot,ScreenShotModeManager.Instance.fixSelfieBodyRotation));
 
         //console.log(`[SelfieCamera] ${this.currentTarget.rotation.eulerAngles.ToString()}`)
 
@@ -264,7 +264,7 @@ export default class SelfieCamera extends ZepetoScriptBehaviour {
             // ZepetoPlayers.instance.characterData.runSpeed = this.initialRunSpeed;
             // ZepetoPlayers.instance.motionV2Data.jumpDashSpeedThreshold = this.initialJumpDashSpeedThreshold;
 
-            this.currentTarget.rotation = Quaternion.Euler(Vector3.op_Subtraction(this.currentTarget.eulerAngles,ScreenShotModeManager.GetInstance().fixSelfieBodyRotation));
+            this.currentTarget.rotation = Quaternion.Euler(Vector3.op_Subtraction(this.currentTarget.eulerAngles,ScreenShotModeManager.Instance.fixSelfieBodyRotation));
         }
 
         if(this.zepetoCharacter) this.zepetoCharacter.ZepetoAnimator.SetBool("SelfieMode", active);

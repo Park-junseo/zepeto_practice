@@ -7,7 +7,7 @@ import SelfieCamera from './SelfieCamera';
 
 export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     
-    private static Instance: ScreenShotModeManager;
+    private static _instance: ScreenShotModeManager;
 
     private localPlayer: ZepetoPlayer;
     private iKController: IKController;
@@ -35,7 +35,7 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     private _fixSelfieBodyRotation: Vector3 = new Vector3(0,-30,0);
 
     Awake() {
-        ScreenShotModeManager.Instance = this;
+        ScreenShotModeManager._instance = this;
     }
 
     Start() {
@@ -213,15 +213,15 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         ZepetoPlayers.instance.ZepetoCamera.LockXAxis = !active;
     }
 
-    public static GetInstance(): ScreenShotModeManager {
-        if(!ScreenShotModeManager.Instance) {
+    public static get Instance(): ScreenShotModeManager {
+        if(!ScreenShotModeManager._instance) {
 
             var _obj = new GameObject("ClientStarter");
             GameObject.DontDestroyOnLoad(_obj);
-            ScreenShotModeManager.Instance = _obj.AddComponent<ScreenShotModeManager>();
+            ScreenShotModeManager._instance = _obj.AddComponent<ScreenShotModeManager>();
         }
 
-        return ScreenShotModeManager.Instance;
+        return ScreenShotModeManager._instance;
     }
 
     public GetIKController() { return this.iKController; }

@@ -9,6 +9,7 @@ import { UnityEvent$1 } from 'UnityEngine.Events'
 import ClientIKManager from './ClientIKManager'
 import ScreenShotModeManager from '../ScreenShotScripts/ScreenShotModeManager'
 import PlayerIKController from './PlayerIKController'
+import GestureController from '../ScreenShotScripts/GestureController'
 
 // type PlayerStatus = {
 //     state: CharacterState;
@@ -50,7 +51,7 @@ type PlayerControlState = {
 
 export default class ClientStarterV2 extends ZepetoScriptBehaviour {
 
-    private static Instance: ClientStarterV2;
+    private static _instance: ClientStarterV2;
 
     public multiplay: ZepetoWorldMultiplay;
 
@@ -120,7 +121,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
     ]
 
     private Awake() {
-        ClientStarterV2.Instance = this;
+        ClientStarterV2._instance = this;
         //this.clientIKManager = this.clientIKManager || this.gameObject.AddComponent<ClientIKManager>();
     }
 
@@ -182,8 +183,8 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                 this.SendState(character.CurrentState);
                 prevState = character.CurrentState;
 
-                if(ScreenShotModeManager.GetInstance().isActiveSelfie) {
-                    this.SendSelfieIK(...(ScreenShotModeManager.GetInstance().GetIKController().GetLookAtAndTargetAt()));
+                if(ScreenShotModeManager.Instance.isActiveSelfie) {
+                    this.SendSelfieIK(...(ScreenShotModeManager.Instance.GetIKController().GetLookAtAndTargetAt()));
                     haveToSendisActiveSelfie = true;
                 } else if(haveToSendisActiveSelfie) {
                     this.SendSelfieExit();
@@ -191,7 +192,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                 }
                 // this.JumpThisPlayer();
                 // this.CheckValidGoundLayer(character);
-                this.debugText.text = `${this.characterStateMap.get(character.CurrentState)}/${this.characterMoveStateMap.get(character.MotionV2.CurrentMoveState)}/${this.characterJumpStateMap.get(character.MotionV2.CurrentJumpState)} camera:${ScreenShotModeManager.GetInstance().isActiveSelfie}`;
+                this.debugText.text = `${this.characterStateMap.get(character.CurrentState)}/${this.characterMoveStateMap.get(character.MotionV2.CurrentMoveState)}/${this.characterJumpStateMap.get(character.MotionV2.CurrentJumpState)} camera:${ScreenShotModeManager.Instance.isActiveSelfie}`;
                 this.debugText.text += `move: ${character.characterController.velocity.ToString()}`;
             }
             yield secondsTick;
@@ -240,9 +241,11 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
             ZepetoPlayers.instance.OnAddedPlayer.AddListener((sessionId: string) => {
                 const isLocal = this.room.SessionId === sessionId;
 
+                const zepetoPlayer = ZepetoPlayers.instance.GetPlayer(sessionId);
+
                 if (!isLocal) {
                     const playerControlStates = this.curPlayerControlStates.get(sessionId);
-                    playerControlStates.zepetoPlayer = ZepetoPlayers.instance.GetPlayer(sessionId);
+                    playerControlStates.zepetoPlayer = zepetoPlayer;
                     playerControlStates.isLoaded = true;
                     
                     // const player: Player = this.currentPlayers.get(sessionId);
@@ -280,6 +283,11 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                     playerControlStates.zepetoPlayer.character.ZepetoAnimator.gameObject.AddComponent<PlayerIKController>().Init(playerControlStates.zepetoPlayer, playerControlStates.selfieIK);
 
                 } 
+
+                const character = zepetoPlayer.character;
+
+                const gestureState = this.room.State.gestures.get_Item(sessionId);
+                gestureState.OnChange += (changeValues) => GestureController.Instance.StartGesture(character, gestureState.clipIndex);
                 
             });
         }
@@ -431,7 +439,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
             rotation
         );
 
-        console.log(`[UpdatePlayer]${player.sessionId}: ${moveDelta}/${curSpeed}/${this.characterStateMap.get(player.state)}`);
+        // console.log(`[UpdatePlayer]${player.sessionId}: ${moveDelta}/${curSpeed}/${this.characterStateMap.get(player.state)}`);
     }
 
     private HandleJumpCounter(jumpCounter: Counter) {
@@ -490,7 +498,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         const character = zepetoPlayer.character;
         // character.transform.rotation.SetLookRotation(lookAtVector);// = lookAtVector;// = Quaternion.Euler(lookAtVector);
         character.transform.LookAt(lookAtVector);
-        character.transform.eulerAngles = UnityEngine.Vector3.op_Addition(new UnityEngine.Vector3(0, character.transform.eulerAngles.y, 0), ScreenShotModeManager.GetInstance().fixSelfieBodyRotation);
+        character.transform.eulerAngles = UnityEngine.Vector3.op_Addition(new UnityEngine.Vector3(0, character.transform.eulerAngles.y, 0), ScreenShotModeManager.Instance.fixSelfieBodyRotation);
         //console.log(`${sessionId}: ${character.transform.rotation.eulerAngles.ToString()}`);
     }
 
@@ -619,6 +627,12 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         this.room.Send("onSelfieIKExit", data.GetObject());
     }
 
+    private SendGestureIndex(clipIndex:number) {
+        const data = new RoomData();
+        data.Add("clipIndex", clipIndex);
+        this.room.Send("onGesture", data.GetObject());
+    }
+
     // private SendPlayerLanding(transform: UnityEngine.Transform, curState: CharacterState, prevState: CharacterState) {
 
     //     if(prevState===CharacterState.Jump || prevState === CharacterState.Falling && 
@@ -666,22 +680,26 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
     // }
 
     /*-------------------public---------------------*/
-    public static GetInstance(): ClientStarterV2 {
-        if(!ClientStarterV2.Instance) {
+    public static get Instance(): ClientStarterV2 {
+        if(!ClientStarterV2._instance) {
 
             var _obj = new UnityEngine.GameObject("ClientStarter");
             UnityEngine.GameObject.DontDestroyOnLoad(_obj);
-            ClientStarterV2.Instance = _obj.AddComponent<ClientStarterV2>();
+            ClientStarterV2._instance = _obj.AddComponent<ClientStarterV2>();
         }
 
-        return ClientStarterV2.Instance;
+        return ClientStarterV2._instance;
     }
     
     public SendPlayerJump(state: CharacterState) {
         if(!this.unableJumpStates.includes(state)) {
             this.room.Send("onPlayerJump");
-            console.log("[SendPlayerJump] jump!")
+            console.log("[SendPlayerJump] jump!");
         }
+    }
+
+    public SendMessageGestrue(clipIndex:number) {
+        this.SendGestureIndex(clipIndex);
     }
 
     public static ParseVector3(vector3: Vector3): UnityEngine.Vector3 {
