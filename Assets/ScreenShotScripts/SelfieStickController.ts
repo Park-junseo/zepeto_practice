@@ -79,11 +79,18 @@ export default class SelfieStickController extends ZepetoScriptBehaviour {
         if(this.isActive === active) return;
         this.isActive = active;
         this.gameObject.SetActive(active);
-        this.SetActiveUI(active);
-        if(this.isLocal && active) {
-            if(SelfieStickController.selfieUIEvent !== null) {
-                SelfieStickController.selfieUIEvent.Invoke();
-            }
+        this.isActiveUI = !this.isLocal && active;
+        // this.SetActiveUI(active);
+        // if(this.isLocal && active) {
+        //     if(SelfieStickController.selfieUIEvent !== null) {
+        //         SelfieStickController.selfieUIEvent.Invoke();
+        //     }
+        // }
+        if(this.isActiveUI) {
+            this.StartCoroutine(this.SetUIRotattion());
+        } else {
+            this.SetActiveSelfieWith(false);
+            this.selfieUI.gameObject.SetActive(false);
         }
     }
 
@@ -111,19 +118,19 @@ export default class SelfieStickController extends ZepetoScriptBehaviour {
         this.SetActiveSelfieWith(false);
     }
 
-    public SetActiveUI(active:boolean) {
-        if(this.isLocal || this.isActiveUI === active) return;
-        this.isActiveUI = active;
-        // this.selfieUI.gameObject.SetActive(active);
-        if(active) {
-            // this.SetSelfieIcon(this.isSelfieWith);
-            this.StartCoroutine(this.SetUIRotattion());
-        } else {
-            this.SetActiveSelfieWith(false);
-        }
-    }
+    // public SetActiveUI(active:boolean) {
+    //     if(this.isActiveUI === active) return;
+    //     this.isActiveUI = active;
+    //     if(!this.isLocal &&  active) {
+    //         // this.SetSelfieIcon(this.isSelfieWith);
+    //         this.StartCoroutine(this.SetUIRotattion());
+    //     } else {
+    //         this.SetActiveSelfieWith(false);
+    //         this.selfieUI.gameObject.SetActive(false);
+    //     }
+    // }
 
-    public Init(isLocal:boolean, sessionId:string) {
+    public Init(isLocal:boolean, sessionId:string): SelfieStickController {
         this.isLocal = isLocal;
         this.sessionId = sessionId;
         if(!isLocal) {
@@ -137,6 +144,8 @@ export default class SelfieStickController extends ZepetoScriptBehaviour {
             SelfieStickController.selfieUIEvent.AddListener(this.disabledSelfieWith);
         }
         this.SetActive(false);
+
+        return this;
     }
 
     public Disable() {
