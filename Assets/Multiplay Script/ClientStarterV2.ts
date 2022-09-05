@@ -22,19 +22,23 @@ import { isNullishCoalesce } from 'typescript'
 // }
 
 class PlayerStatus {
-    constructor(s:CharacterState, p:UnityEngine.Vector3, r:UnityEngine.Vector3) {
-        this.UpdateForm(s,p,r);
+    constructor(s:CharacterState, p:UnityEngine.Vector3, r:UnityEngine.Vector3, q:number, d:UnityEngine.Vector3) {
+        this.UpdateForm(s,p,r,q, d);
     }
 
-    public UpdateForm(s:CharacterState, p:UnityEngine.Vector3, r:UnityEngine.Vector3) {
+    public UpdateForm(s:CharacterState, p:UnityEngine.Vector3, r:UnityEngine.Vector3, q:number, d:UnityEngine.Vector3) {
         this.state = s;
         this.position = p;
         this.rotation = r;
+        this.quadrant = q;
+        this.moveDir = d;
     }
 
     state: CharacterState;
     position: UnityEngine.Vector3;
     rotation: UnityEngine.Vector3;
+    quadrant: number;
+    moveDir: UnityEngine.Vector3;
 }
 
 type Counter = {
@@ -258,14 +262,22 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                     // const jumpCounter = this.curPlayersJumpCounter.get(sessionId);
 
                     // [RoomState] Called whenever the state of the player instance is updated. 
+
+                    const playerState = playerControlStates.playerState;
+
+                    const position = ClientStarterV2.ParseVector3(playerState.transform.position);
+                    const tempMoveDir = UnityEngine.Vector3.op_Subtraction(position, zepetoPlayer.character.transform.position);
+
                     const prevPlayerStatus:PlayerStatus = new PlayerStatus(
-                        playerControlStates.zepetoPlayer.character.CurrentState,
-                        playerControlStates.zepetoPlayer.character.transform.position,
-                        playerControlStates.zepetoPlayer.character.transform.rotation.eulerAngles
+                        zepetoPlayer.character.CurrentState,
+                        zepetoPlayer.character.transform.position,
+                        zepetoPlayer.character.transform.rotation.eulerAngles,
+                        ClientStarterV2.Op_Quadrant(tempMoveDir),
+                        tempMoveDir
                     );
 
-                    playerControlStates.playerState.OnChange += (changeValues) => {
-                        this.OnUpdatePlayer(playerControlStates.zepetoPlayer, playerControlStates.playerState, prevPlayerStatus);
+                    playerState.OnChange += (changeValues) => {
+                        this.OnUpdatePlayer(zepetoPlayer, playerState, prevPlayerStatus);
                         //console.log(temp);
                     }                    
                     jumpTrigger.OnChange += (changeVlaues) => this.HandleJumpCounter(playerControlStates.jumpCounter);
@@ -395,7 +407,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         //     if(!player.isSelfieIK) zepetoPlayer.character.transform.rotation = UnityEngine.Quaternion.Euler($prevStatus.rotation);
         // }
 
-        var moveDir = UnityEngine.Vector3.op_Subtraction(position, character.transform.position);
+        let moveDir = UnityEngine.Vector3.op_Subtraction(position, character.transform.position);
         // moveDir = UnityEngine.Vector3.op_Multiply(new UnityEngine.Vector3(moveDir.x, 0, moveDir.z), 1);
         //moveDir = new UnityEngine.Vector3(moveDir.x, 0, moveDir.z);
 
@@ -404,6 +416,14 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         //     moveDir.z = 0;
         // }
 
+        const curQuaDrant = ClientStarterV2.Op_Quadrant(moveDir);
+        if(curQuaDrant !== $prevStatus.quadrant && this.stopPlayerStates.includes(player.state)) {
+            character.StopMoving();
+            character.transform.position = position;
+            moveDir = UnityEngine.Vector3.zero;
+            if(!player.isSelfieIK) character.transform.rotation = UnityEngine.Quaternion.Euler(rotation);
+        }
+
         // 동기화2
         const curSpeed = character.characterController.velocity.magnitude;
         let moveDelta = moveDir.magnitude;
@@ -411,13 +431,18 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         const minSpeed = moveDelta/this.updateTickSize;
 
         if(curSpeed < minSpeed && this.stopPlayerStates.includes(player.state)) {
-            character.StopMoving();
             // if(character.transform.position.y !== position.y) {
             //     character.transform.position = position;
             //     moveDelta = 0;
             // }
-            character.transform.position = position;
-            moveDelta = 0;
+            // character.transform.position = position;
+            // moveDelta = 0;
+            if(character.CurrentState !== player.state) {
+                character.StopMoving();
+                character.transform.position = position;
+                moveDir = UnityEngine.Vector3.zero;
+                moveDelta = 0;
+            }
             if(!player.isSelfieIK) character.transform.rotation = UnityEngine.Quaternion.Euler(rotation);
         }
 
@@ -432,14 +457,15 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
             //     return;
             character.StopMoving();
         } else if(player.state !== CharacterState.MoveTurn) {
-            moveDir.y = 0;
-            character.MoveContinuously(moveDir);
+            character.MoveContinuously(new UnityEngine.Vector3(moveDir.x, 0, moveDir.z));
         }
 
         $prevStatus.UpdateForm(
             player.state,
             position,
-            rotation
+            rotation,
+            curQuaDrant,
+            moveDir,
         );
 
         // console.log(`[UpdatePlayer]${player.sessionId}: ${moveDelta}/${curSpeed}/${this.characterStateMap.get(player.state)}`);
@@ -726,5 +752,20 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
             vector3.y,
             vector3.z
         );
+    }
+
+    public static Op_Quadrant(vector: UnityEngine.Vector3):number {
+        let result:number = 0;
+        if( vector.x > 0 && vector.z > 0) {
+			result = 1;
+		}else if( vector.x < 0 && vector.z > 0 ) {
+			result = 2;
+		}else if( vector.x < 0 && vector.z < 0) {
+			result = 3;
+		}else {
+			result = 4;
+		}
+
+        return result;
     }
 }
