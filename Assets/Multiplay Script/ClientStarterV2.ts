@@ -10,6 +10,7 @@ import ClientIKManager from './ClientIKManager'
 import ScreenShotModeManager from '../ScreenShotScripts/ScreenShotModeManager'
 import PlayerIKController from './PlayerIKController'
 import GestureController from '../ScreenShotScripts/GestureController'
+import { isNullishCoalesce } from 'typescript'
 
 // type PlayerStatus = {
 //     state: CharacterState;
@@ -47,6 +48,7 @@ type PlayerControlState = {
     selfieIK:SelfieIK;
     isLoaded: boolean;
     isLocal: boolean;
+    playerIK: PlayerIKController
 }
 
 export default class ClientStarterV2 extends ZepetoScriptBehaviour {
@@ -280,7 +282,7 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
                     //     this.OnJumpPlayer(zepetoPlayer.character, jumpCounter, cur, prev)
                     // });
 
-                    playerControlStates.zepetoPlayer.character.ZepetoAnimator.gameObject.AddComponent<PlayerIKController>().Init(playerControlStates.zepetoPlayer, playerControlStates.selfieIK);
+                    playerControlStates.playerIK = playerControlStates.zepetoPlayer.character.ZepetoAnimator.gameObject.AddComponent<PlayerIKController>().Init(playerControlStates.zepetoPlayer, playerControlStates.selfieIK, sessionId);
 
                 } 
 
@@ -348,7 +350,8 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
             jumpCounter: {value:0},
             selfieIK: selfieIK,
             isLoaded: false,
-            isLocal: isLocal
+            isLocal: isLocal,
+            playerIK: null
         });
 
         ZepetoPlayers.instance.CreatePlayerWithUserId(sessionId, player.zepetoUserId, spawnInfo, isLocal);
@@ -633,6 +636,13 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
         this.room.Send("onGesture", data.GetObject());
     }
 
+    private SendSelfieWith(active:boolean, sessionId:string) {
+        const data = new RoomData();
+        data.Add("isActive", active);
+        data.Add("selfieSession", sessionId);
+        this.room.Send("onSelfieWith", data.GetObject());
+    }
+
     // private SendPlayerLanding(transform: UnityEngine.Transform, curState: CharacterState, prevState: CharacterState) {
 
     //     if(prevState===CharacterState.Jump || prevState === CharacterState.Falling && 
@@ -701,6 +711,13 @@ export default class ClientStarterV2 extends ZepetoScriptBehaviour {
     public SendMessageGestrue(clipIndex:number) {
         this.SendGestureIndex(clipIndex);
     }
+    
+    public SendMessageSelfieWith(active:boolean, sessionId:string) {
+        this.SendSelfieWith(active, sessionId);
+        console.log(`[SendMessageSelfieWith] follow ${sessionId} selife is ${active? 'on':'off'}`)
+    }
+
+    public get CurPlayerControlStates() { return this.curPlayerControlStates; }
 
     public static ParseVector3(vector3: Vector3): UnityEngine.Vector3 {
         return new UnityEngine.Vector3

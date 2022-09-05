@@ -4,6 +4,12 @@ import { ZepetoScriptBehaviour } from 'ZEPETO.Script'
 import ScreenShotController from './ScreenShotController';
 import ScreenShotModeManager from './ScreenShotModeManager';
 
+enum LAYER {
+    everything= -1,
+    nothing= 0,
+    UI= 5,
+};
+
 export default class UIController extends ZepetoScriptBehaviour {
     
     public safeAreaObject: GameObject;
@@ -62,14 +68,13 @@ export default class UIController extends ZepetoScriptBehaviour {
     @Header("ScreenShot Mode Module")
     public screenShotModeModule: GameObject;
 
+    @Header("Selfie Icon")
+    public readonly selfieBlueSprite: Sprite;
+    @SerializeField()
+    public readonly selfieGreenSprite: Sprite;
+
     /*Player Layer Setting*/
     private playerLayer: number = 0;
-
-    LAYER = {
-        everything: -1,
-        nothing: 0,
-        UI: 5,
-    };
 
     // Data
     TOAST_MESSAGE = {
@@ -79,8 +84,12 @@ export default class UIController extends ZepetoScriptBehaviour {
         screenShotSaveCompleted: "Saved!"
     };
 
+    private static _instance:UIController;
+
 
     Awake() {
+        UIController._instance = this;
+
         this.isBackgroundOn = true;
         this.zepetoScreenShotCanvas.sortingOrder = 1;
         this.waitForSecond = new WaitForSeconds(1);
@@ -93,7 +102,7 @@ export default class UIController extends ZepetoScriptBehaviour {
         
         this.screenShot = this.screenShotModeModule.GetComponent<ScreenShotController>();
         this.screenShotModeManager = this.screenShotModeModule.GetComponent<ScreenShotModeManager>();
-        this.playerLayer = this.screenShotModeManager.GetPlayerLayer();
+        this.playerLayer = ScreenShotModeManager.playerLayer;
 
         this.viewChangeImage = this.viewChangeButton.GetComponent<Image>();
         this.backgroundOnOffImage = this.backgroundOnOffButton.GetComponent<Image>();
@@ -271,14 +280,25 @@ export default class UIController extends ZepetoScriptBehaviour {
         if (active) {
             this.backgroundCanvas.gameObject.SetActive(!active);
             //Layer Settings to Everything
-            this.screenShotModeManager.GetSelfieCamera().cullingMask = this.LAYER.everything;
-            this.screenShotModeManager.GetZepetoCamera().cullingMask = this.LAYER.everything;
+            this.screenShotModeManager.GetSelfieCamera().cullingMask = LAYER.everything;
+            this.screenShotModeManager.GetZepetoCamera().cullingMask = LAYER.everything;
         } else {
             this.backgroundCanvas.gameObject.SetActive(!active);
             //Change the Layer setting to only include nothing, player, and UI Layers
-            this.screenShotModeManager.GetSelfieCamera().cullingMask = this.LAYER.nothing | 1 << this.playerLayer | 1 << this.LAYER.UI;
-            this.screenShotModeManager.GetZepetoCamera().cullingMask = this.LAYER.nothing | 1 << this.playerLayer | 1 << this.LAYER.UI;
+            this.screenShotModeManager.GetSelfieCamera().cullingMask = LAYER.nothing | 1 << this.playerLayer | 1 << LAYER.UI;
+            this.screenShotModeManager.GetZepetoCamera().cullingMask = LAYER.nothing | 1 << this.playerLayer | 1 << LAYER.UI;
         }
+    }
+
+    public static get Instance(): UIController {
+        if(!UIController._instance) {
+
+            var _obj = new GameObject("UIController");
+            GameObject.DontDestroyOnLoad(_obj);
+            UIController._instance = _obj.AddComponent<UIController>();
+        }
+
+        return UIController._instance;
     }
 }
 

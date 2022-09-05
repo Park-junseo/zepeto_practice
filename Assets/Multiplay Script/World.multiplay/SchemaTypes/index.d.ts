@@ -43,6 +43,7 @@ declare module "ZEPETO.Multiplay.Schema" {
 		isSelfie: boolean;
 		lookAt: Vector3;
 		targetAt: Vector3;
+		selfieSession: string;
 	}
 	class Gesture extends Schema {
 		clipIndex: number;

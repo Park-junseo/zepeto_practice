@@ -174,6 +174,15 @@ export default class extends Sandbox {
             gesture.clipIndex = message.clipIndex;
         });
 
+        this.onMessage("onSelfieWith", (client, message) => {
+            const selfieIK = this.state.selfieIKs.get(client.sessionId);
+            if(message.isActive && message.selfieSession) {
+                selfieIK.selfieSession = message.selfieSession;
+            } else {
+                selfieIK.selfieSession = '';
+            }
+        });
+
     }
     
    
@@ -209,7 +218,9 @@ export default class extends Sandbox {
         /* landingPoints Map------------------*/
 
         /* selfieIKs Map------------------*/
-        this.state.selfieIKs.set(client.sessionId, new SelfieIK());
+        const selfieIK = new SelfieIK();
+        selfieIK.selfieSession = '';
+        this.state.selfieIKs.set(client.sessionId, selfieIK);
         /* selfieIKs Map------------------*/ 
         
         /* gestures Map----------------------*/

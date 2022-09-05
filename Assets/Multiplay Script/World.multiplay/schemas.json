@@ -6,6 +6,6 @@
 "Action" : {"jumpTrigger" : "boolean"},
 "Trigger" : {"trigger" : "boolean"},
 "LandingPoint" : {"transform" : "Transform"},
-"SelfieIK" : {"isSelfie" : "boolean","lookAt" : "Vector3","targetAt" : "Vector3"},
+"SelfieIK" : {"isSelfie" : "boolean","lookAt" : "Vector3","targetAt" : "Vector3","selfieSession" : "string"},
 "Gesture" : {"clipIndex" : "number"}
 }

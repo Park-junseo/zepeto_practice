@@ -4,6 +4,7 @@ import { ZepetoScriptBehaviour } from 'ZEPETO.Script'
 import IKController from './IKController';
 import ScreenShotController from './ScreenShotController';
 import SelfieCamera from './SelfieCamera';
+import SelfieStickController from './SelfieStickController';
 
 export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     
@@ -21,15 +22,18 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
 
     private _isActiveSelfie: boolean = false;
 
-    public selfieStickPrefab: GameObject;
-    private selfieStick: GameObject = undefined;
+    @SerializeField()
+    private selfieStickPrefab: GameObject;
+    
+    private selfieStick: SelfieStickController = undefined;
 
     // private lookAtTransform: Transform;
     // private targetTransform: Transform;
 
     // Data
-    private playerLayer: number = 21;
-    private _rightHandBone :string = "hand_R";
+    public static readonly playerLayer: number = 21;
+    public static readonly zUILayer: number = 22;
+    public static readonly _rightHandBone :string = "hand_R";
 
     @SerializeField()
     private _fixSelfieBodyRotation: Vector3 = new Vector3(0,-30,0);
@@ -103,25 +107,29 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
     }
 
     public SetPlayerLayer (character:ZepetoCharacter) {
-        if(character.gameObject.layer != this.playerLayer) {
+        if(character.gameObject.layer != ScreenShotModeManager.playerLayer) {
             character.GetComponentsInChildren<Transform>().forEach((characterObj) => {
-                characterObj.gameObject.layer = this.playerLayer;
+                characterObj.gameObject.layer = ScreenShotModeManager.playerLayer;
             });
         }   
     }
 
-    public SetSelfieHand(character:ZepetoCharacter, selfieStick: GameObject|undefined) :GameObject {
-        if(!character) return;
+    //sessionId를 비워놓을 시, isLocal
+    public SetSelfieHand(character:ZepetoCharacter, selfieStick: SelfieStickController|undefined, sessionId:string = '') :SelfieStickController {
+        if(!character || !ZepetoPlayers.instance.ZepetoCamera) {
+            console.warn(`[ScreenShotModeManager] SetSelfieHand: character or camera is null`);
+            return;
+        }
 
-        if(selfieStick === undefined) selfieStick = GameObject.Instantiate<GameObject>(this.selfieStickPrefab);
-        
+        if(selfieStick === undefined) selfieStick = GameObject.Instantiate<GameObject>(this.selfieStickPrefab).GetComponent<SelfieStickController>();
+        selfieStick.Init(sessionId === '', sessionId);
+
         character.GetComponentsInChildren<Transform>().forEach((characterObj) => {
-            if(characterObj.name == this._rightHandBone) {
+            if(characterObj.name == ScreenShotModeManager._rightHandBone) {
                 selfieStick.transform.parent = characterObj;
                 selfieStick.transform.localPosition = Vector3.zero;
                 selfieStick.transform.localRotation = Quaternion.Euler(Vector3.zero);
-                selfieStick.GetComponentInChildren<Renderer>().gameObject.layer = this.playerLayer;
-                selfieStick.SetActive(false);
+                selfieStick.GetComponentInChildren<Renderer>().gameObject.layer = ScreenShotModeManager.playerLayer;
             }
         });
 
@@ -152,9 +160,13 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
         this._isActiveSelfie = false;
     }
 
-    public GetPlayerLayer(): number {
-        return this.playerLayer;
-    }
+    // public GetPlayerLayer(): number {
+    //     return ScreenShotModeManager.playerLayer;
+    // }
+
+    // public GetzUILayer(): number {
+    //     return ScreenShotModeManager.zUILayer;
+    // }
     // Return Selfie Camera
     public GetSelfieCamera(): Camera {
         return this.selfieCamera.GetCamera();
@@ -228,7 +240,7 @@ export default class ScreenShotModeManager extends ZepetoScriptBehaviour {
 
     public get isActiveSelfie() { return this._isActiveSelfie; }
 
-    public get rightHandBone() {return this._rightHandBone;}
+    // public get rightHandBone() {return ScreenShotModeManager._rightHandBone;}
 
     public get fixSelfieBodyRotation() {return this._fixSelfieBodyRotation;}
 }
