@@ -20,55 +20,58 @@ ScriptedImporter:
   wrapperOutputDirectory: Generated
   compiledResult: '{"source":"\"use strict\";\r\nObject.defineProperty(exports, \"__esModule\",
     { value: true });\r\nconst ZEPETO_Script_1 = require(\"ZEPETO.Script\");\r\nconst
-    UnityEngine_1 = require(\"UnityEngine\");\r\nclass IKController extends ZEPETO_Script_1.ZepetoScriptBehaviour
-    {\r\n    constructor() {\r\n        super(...arguments);\r\n        // Body and
-    head weight setting for target\r\n        // Controls how strongly the body reacts
-    to the movement of the target\r\n        this._bodyWeight = 0.3;\r\n        this._headWeight
-    = 0.7;\r\n        //Whether or not to apply IK\r\n        this.useIKWeight =
-    false;\r\n        this.rightAramBones = [\r\n            //HumanBodyBones.RightHand,\r\n           
-    UnityEngine_1.HumanBodyBones.RightLowerArm,\r\n            UnityEngine_1.HumanBodyBones.RightUpperArm,\r\n           
-    //HumanBodyBones.RightShoulder,\r\n        ];\r\n    }\r\n    Start() {\r\n       
-    this.animator = this.GetComponent($typeof(UnityEngine_1.Animator));\r\n       
+    UnityEngine_1 = require(\"UnityEngine\");\r\nconst PlayerIKController_1 = require(\"../Multiplay
+    Script/PlayerIKController\");\r\nconst ClientStarterV2_1 = require(\"../Multiplay
+    Script/ClientStarterV2\");\r\nclass IKController extends ZEPETO_Script_1.ZepetoScriptBehaviour
+    {\r\n    constructor() {\r\n        super(...arguments);\r\n        //Whether
+    or not to apply IK\r\n        this.useIKWeight = false;\r\n        //SelfieWith\r\n       
+    this.useSelfieWIthIKWeight = false;\r\n        this.rightAramBones = [\r\n           
+    //HumanBodyBones.RightHand,\r\n            UnityEngine_1.HumanBodyBones.RightLowerArm,\r\n           
+    UnityEngine_1.HumanBodyBones.RightUpperArm,\r\n            //HumanBodyBones.RightShoulder,\r\n       
+    ];\r\n    }\r\n    Start() {\r\n        this.animator = this.GetComponent($typeof(UnityEngine_1.Animator));\r\n       
     //Disable IK weight initially, and use it when changing to selfie mode\r\n       
     this.SetIKWeightActive(false);\r\n    }\r\n    //Toggle IK weight on/off\r\n   
     SetIKWeightActive(active) {\r\n        this.useIKWeight = active;\r\n    }\r\n   
-    // Set Target to look at and Grip to reach out\r\n    SetTargetAndGrip(lookAtTarget,
+    SetSelfieWithIKActive(active) {\r\n        this.useSelfieWIthIKWeight = active;\r\n   
+    }\r\n    // Set Target to look at and Grip to reach out\r\n    SetTargetAndGrip(lookAtTarget,
     gripTarget, bodySource) {\r\n        this.lookAtTarget = lookAtTarget;\r\n       
     this.gripTarget = gripTarget;\r\n        this.bodySource = bodySource;\r\n   
-    }\r\n    OnAnimatorIK(layerIndex) {\r\n        // IK is not using IK, Third-person
-    mode\r\n        if (!this.useIKWeight) {\r\n            return;\r\n        }\r\n       
-    // When using IK, Selfie mode\r\n        if (this.animator == null ||\r\n           
+    }\r\n    SetPlayerIK(playerIKController) {\r\n        this.targetPlayerIK = playerIKController;\r\n   
+    }\r\n    OnSelfieCamera() {\r\n        // IK is not using IK, Third-person mode\r\n       
+    if (!this.useIKWeight) {\r\n            return;\r\n        }\r\n        // When
+    using IK, Selfie mode\r\n        if (this.animator == null ||\r\n           
     this.lookAtTarget == null ||\r\n            this.gripTarget == null)\r\n           
-    return;\r\n        // this.rightAramBones.forEach((bones)=>{\r\n        //    
-    this.animator.SetBoneLocalRotation(bones, this.ikRotation);\r\n        // });\r\n       
-    // this.animator.SetBoneLocalRotation(HumanBodyBones.RightShoulder, Quaternion.Euler(new
-    Vector3(174, -1, -85)));\r\n        // this.animator.SetBoneLocalRotation(HumanBodyBones.UpperChest,
-    Quaternion.Euler(new Vector3(4, 5, 0)));\r\n        // this.animator.SetBoneLocalRotation(HumanBodyBones.Chest,
-    Quaternion.Euler(new Vector3(3, 0, 0)));\r\n        // const forward = ZepetoPlayers.instance.ZepetoCamera.cameraParent.forward;\r\n       
-    // forward.y = 0;\r\n        // const look = ZepetoPlayers.instance.ZepetoCamera.cameraParent.position
-    + forward*-3\r\n        // Set the look weight when the body and head looks at
-    the target. \r\n        this.animator.SetLookAtWeight(1, this._bodyWeight, this._headWeight);\r\n       
-    // set lookAt target\r\n        this.animator.SetLookAtPosition(this.lookAtTarget.position);\r\n       
-    // this.animator.SetLookAtPosition(look);\r\n        //this.animator.SetLookAtPosition(ZepetoPlayers.instance.ZepetoCamera.cameraParent.position);\r\n       
-    // console.log(`[IKController] ${ZepetoPlayers.instance.LocalPlayer.movingAxis.position.ToString()}`);\r\n       
-    // this.animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);\r\n        //
-    this.animator.SetIKRotation(AvatarIKGoal.RightHand, this.gripTarget.rotation);//Quaternion.Euler(new
-    Vector3(3,-3,3)));\r\n        // this.animator.SetIKRotationWeight(AvatarIKGoal.RightHand,
-    1);\r\n        // this.animator.SetIKRotation(AvatarIKGoal.RightHand, this.ikRotation);//Quaternion.Euler(new
-    Vector3(3,-3,3)));\r\n        // Set target weight for rightHand\r\n        this.animator.SetIKPositionWeight(UnityEngine_1.AvatarIKGoal.RightHand,
+    return;\r\n        // Set the look weight when the body and head looks at the
+    target. \r\n        this.animator.SetLookAtWeight(1, IKController.bodyWeight,
+    IKController.headWeight);\r\n        // set lookAt target\r\n        this.animator.SetLookAtPosition(this.lookAtTarget.position);\r\n       
+    // Set target weight for rightHand\r\n        this.animator.SetIKPositionWeight(UnityEngine_1.AvatarIKGoal.RightHand,
     1);\r\n        // Set the rightHand to Grip where it extends\r\n        //this.animator.SetIKPosition(AvatarIKGoal.RightHand,
     this.gripTarget.position);\r\n        this.animator.SetIKPosition(UnityEngine_1.AvatarIKGoal.RightHand,
     this.gripTarget.position);\r\n        // this.animator.SetIKPosition(AvatarIKGoal.RightHand,
     look+this.gripTarget.position);\r\n        //console.log(`[OnAnimatorIK] ${this.gripTarget.gameObject.name}/${this.lookAtTarget.gameObject.name}:
     ${this.gripTarget.position.ToString()}/${this.lookAtTarget.position.ToString()}`);\r\n   
-    }\r\n    // LateUpdate() {\r\n    //     this.ikRotation = Quaternion.FromToRotation(this.bodySource.position,
-    this.gripTarget.position);\r\n    //     // this.ikPosition = ZepetoPlayers.instance.ZepetoCamera.cameraParent.transform.position;\r\n   
+    }\r\n    OnSelfieWith() {\r\n        if (!this.useSelfieWIthIKWeight) {\r\n           
+    return;\r\n        }\r\n        // When using IK, Selfie mode\r\n        if (this.animator
+    == null ||\r\n            this.targetPlayerIK === null ||\r\n            !this.targetPlayerIK.isSelfie)\r\n           
+    return;\r\n        // Set the look weight when the body and head looks at the
+    target. \r\n        this.animator.SetLookAtWeight(1, IKController.bodyLightWeight,
+    IKController.headLightWeight);\r\n        // set lookAt target\r\n        this.animator.SetLookAtPosition(this.targetPlayerIK.lookAtVector);\r\n   
+    }\r\n    OnAnimatorIK(layerIndex) {\r\n        this.OnSelfieCamera();\r\n       
+    this.OnSelfieWith();\r\n    }\r\n    // LateUpdate() {\r\n    //     this.ikRotation
+    = Quaternion.FromToRotation(this.bodySource.position, this.gripTarget.position);\r\n   
+    //     // this.ikPosition = ZepetoPlayers.instance.ZepetoCamera.cameraParent.transform.position;\r\n   
     //     // console.log(this.ikPosition.ToString());\r\n    //     // this.animator.SetBoneLocalRotation(HumanBodyBones.Chest,
-    Quaternion.Euler(new Vector3(3, 0, 0)));\r\n    // }\r\n    GetLookAtTransform()
-    { return this.lookAtTarget; }\r\n    GetTargetAtTransform() { return this.gripTarget;
-    }\r\n    get bodyWeight() { return this._bodyWeight; }\r\n    get headWeight()
-    { return this._headWeight; }\r\n    GetLookAtAndTargetAt() {\r\n        return
-    [\r\n            this.lookAtTarget.position,\r\n            this.gripTarget.position\r\n       
-    ];\r\n    }\r\n}\r\nexports.default = IKController;\r\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSUtDb250cm9sbGVyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiSUtDb250cm9sbGVyLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUEsaURBQXFEO0FBQ3JELDZDQUFxRztBQUdyRyxNQUFxQixZQUFhLFNBQVEscUNBQXFCO0lBQS9EOztRQVNJLDBDQUEwQztRQUMxQyxzRUFBc0U7UUFDOUQsZ0JBQVcsR0FBVyxHQUFHLENBQUM7UUFDMUIsZ0JBQVcsR0FBVyxHQUFHLENBQUM7UUFFbEMsNEJBQTRCO1FBQ3BCLGdCQUFXLEdBQVksS0FBSyxDQUFDO1FBTTdCLG1CQUFjLEdBQUc7WUFDckIsMkJBQTJCO1lBQzNCLDRCQUFjLENBQUMsYUFBYTtZQUM1Qiw0QkFBYyxDQUFDLGFBQWE7WUFDNUIsK0JBQStCO1NBRWxDLENBQUE7SUEyRkwsQ0FBQztJQXpGRyxLQUFLO1FBQ0QsSUFBSSxDQUFDLFFBQVEsR0FBRyxJQUFJLENBQUMsWUFBWSxTQUFDLHNCQUFRLEVBQUcsQ0FBQztRQUM5QyxzRUFBc0U7UUFDdEUsSUFBSSxDQUFDLGlCQUFpQixDQUFDLEtBQUssQ0FBQyxDQUFDO0lBQ2xDLENBQUM7SUFFRCx5QkFBeUI7SUFDbEIsaUJBQWlCLENBQUMsTUFBZTtRQUNwQyxJQUFJLENBQUMsV0FBVyxHQUFHLE1BQU0sQ0FBQztJQUM5QixDQUFDO0lBRUQsOENBQThDO0lBQ3ZDLGdCQUFnQixDQUFDLFlBQXVCLEVBQUUsVUFBcUIsRUFBRSxVQUFxQjtRQUN6RixJQUFJLENBQUMsWUFBWSxHQUFHLFlBQVksQ0FBQztRQUNqQyxJQUFJLENBQUMsVUFBVSxHQUFHLFVBQVUsQ0FBQztRQUM3QixJQUFJLENBQUMsVUFBVSxHQUFHLFVBQVUsQ0FBQztJQUNqQyxDQUFDO0lBRUQsWUFBWSxDQUFDLFVBQWtCO1FBRTNCLHdDQUF3QztRQUN4QyxJQUFHLENBQUMsSUFBSSxDQUFDLFdBQVcsRUFBRTtZQUNsQixPQUFPO1NBQ1Y7UUFFRCw2QkFBNkI7UUFDN0IsSUFBSSxJQUFJLENBQUMsUUFBUSxJQUFJLElBQUk7WUFDckIsSUFBSSxDQUFDLFlBQVksSUFBSSxJQUFJO1lBQ3pCLElBQUksQ0FBQyxVQUFVLElBQUksSUFBSTtZQUN2QixPQUFPO1FBRVgseUNBQXlDO1FBQ3pDLGtFQUFrRTtRQUNsRSxNQUFNO1FBRU4saUhBQWlIO1FBQ2pILHlHQUF5RztRQUN6RyxvR0FBb0c7UUFDcEcsNEVBQTRFO1FBQzVFLGlCQUFpQjtRQUVqQixzRkFBc0Y7UUFHdEYsbUVBQW1FO1FBQ25FLElBQUksQ0FBQyxRQUFRLENBQUMsZUFBZSxDQUFDLENBQUMsRUFBRSxJQUFJLENBQUMsV0FBVyxFQUFFLElBQUksQ0FBQyxXQUFXLENBQUMsQ0FBQztRQUNyRSxvQkFBb0I7UUFDcEIsSUFBSSxDQUFDLFFBQVEsQ0FBQyxpQkFBaUIsQ0FBQyxJQUFJLENBQUMsWUFBWSxDQUFDLFFBQVEsQ0FBQyxDQUFDO1FBQzVELHlDQUF5QztRQUN6Qyw2RkFBNkY7UUFHN0Ysc0dBQXNHO1FBQ3RHLGdFQUFnRTtRQUNoRSwwSEFBMEg7UUFFMUgsZ0VBQWdFO1FBQ2hFLGlIQUFpSDtRQUVqSCxrQ0FBa0M7UUFDbEMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxtQkFBbUIsQ0FBQywwQkFBWSxDQUFDLFNBQVMsRUFBRSxDQUFDLENBQUMsQ0FBQztRQUM3RCw2Q0FBNkM7UUFDN0MsZ0ZBQWdGO1FBRWhGLElBQUksQ0FBQyxRQUFRLENBQUMsYUFBYSxDQUFDLDBCQUFZLENBQUMsU0FBUyxFQUFFLElBQUksQ0FBQyxVQUFVLENBQUMsUUFBUSxDQUFDLENBQUM7UUFDOUUsc0ZBQXNGO1FBRXRGLHlMQUF5TDtJQUM3TCxDQUFDO0lBRUQsaUJBQWlCO0lBQ2pCLHVHQUF1RztJQUN2RyxnR0FBZ0c7SUFDaEcsa0RBQWtEO0lBQ2xELDJHQUEyRztJQUMzRyxJQUFJO0lBRUcsa0JBQWtCLEtBQUksT0FBTyxJQUFJLENBQUMsWUFBWSxDQUFDLENBQUMsQ0FBQztJQUNqRCxvQkFBb0IsS0FBSSxPQUFPLElBQUksQ0FBQyxVQUFVLENBQUMsQ0FBQyxDQUFDO0lBRXhELElBQVcsVUFBVSxLQUFJLE9BQU8sSUFBSSxDQUFDLFdBQVcsQ0FBQyxDQUFBLENBQUM7SUFDbEQsSUFBVyxVQUFVLEtBQUksT0FBTyxJQUFJLENBQUMsV0FBVyxDQUFDLENBQUEsQ0FBQztJQUUzQyxvQkFBb0I7UUFDdkIsT0FBTztZQUNILElBQUksQ0FBQyxZQUFZLENBQUMsUUFBUTtZQUMxQixJQUFJLENBQUMsVUFBVSxDQUFDLFFBQVE7U0FDM0IsQ0FBQztJQUNOLENBQUM7Q0FDSjtBQXRIRCwrQkFzSEMifQ==","assetPath":"Assets/ScreenShotScripts/IKController.ts","manifest":{"properties":[],"name":"IKController","description":""},"isCompiled":true}'
-  typescriptHash: b03de621c327438b658b7102600b035d
+    Quaternion.Euler(new Vector3(3, 0, 0)));\r\n    // }\r\n    StartSelfieWith(isSelfieWith,
+    sessionId) {\r\n        this.useSelfieWIthIKWeight = isSelfieWith;\r\n       
+    this.targetPlayerIK = (isSelfieWith) ? ClientStarterV2_1.default.Instance.CurPlayerControlStates.get(sessionId).playerIK
+    : null;\r\n    }\r\n    GetLookAtTransform() { return this.lookAtTarget; }\r\n   
+    GetTargetAtTransform() { return this.gripTarget; }\r\n    // public get bodyWeight()
+    {return this._bodyWeight;}\r\n    // public get headWeight() {return this._headWeight;}\r\n   
+    GetLookAtAndTargetAt() {\r\n        return [\r\n            this.lookAtTarget.position,\r\n           
+    this.gripTarget.position\r\n        ];\r\n    }\r\n}\r\nexports.default = IKController;\r\n//
+    Body and head weight setting for target\r\n// Controls how strongly the body
+    reacts to the movement of the target\r\nIKController.bodyWeight = 0.3;\r\nIKController.headWeight
+    = 0.7;\r\nIKController.bodyLightWeight = 0.1;\r\nIKController.headLightWeight
+    = 0.7;\r\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSUtDb250cm9sbGVyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiSUtDb250cm9sbGVyLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUEsaURBQXFEO0FBQ3JELDZDQUFxRztBQUVyRywrRUFBd0U7QUFDeEUseUVBQWtFO0FBRWxFLE1BQXFCLFlBQWEsU0FBUSxxQ0FBcUI7SUFBL0Q7O1FBY0ksNEJBQTRCO1FBQ3BCLGdCQUFXLEdBQVksS0FBSyxDQUFDO1FBR3JDLFlBQVk7UUFDSiwwQkFBcUIsR0FBWSxLQUFLLENBQUM7UUFVdkMsbUJBQWMsR0FBRztZQUNyQiwyQkFBMkI7WUFDM0IsNEJBQWMsQ0FBQyxhQUFhO1lBQzVCLDRCQUFjLENBQUMsYUFBYTtZQUM1QiwrQkFBK0I7U0FFbEMsQ0FBQTtJQXVHTCxDQUFDO0lBckdHLEtBQUs7UUFDRCxJQUFJLENBQUMsUUFBUSxHQUFHLElBQUksQ0FBQyxZQUFZLFNBQUMsc0JBQVEsRUFBRyxDQUFDO1FBQzlDLHNFQUFzRTtRQUN0RSxJQUFJLENBQUMsaUJBQWlCLENBQUMsS0FBSyxDQUFDLENBQUM7SUFDbEMsQ0FBQztJQUVELHlCQUF5QjtJQUNsQixpQkFBaUIsQ0FBQyxNQUFlO1FBQ3BDLElBQUksQ0FBQyxXQUFXLEdBQUcsTUFBTSxDQUFDO0lBQzlCLENBQUM7SUFFTSxxQkFBcUIsQ0FBQyxNQUFlO1FBQ3hDLElBQUksQ0FBQyxxQkFBcUIsR0FBRyxNQUFNLENBQUM7SUFDeEMsQ0FBQztJQUVELDhDQUE4QztJQUN2QyxnQkFBZ0IsQ0FBQyxZQUF1QixFQUFFLFVBQXFCLEVBQUUsVUFBcUI7UUFDekYsSUFBSSxDQUFDLFlBQVksR0FBRyxZQUFZLENBQUM7UUFDakMsSUFBSSxDQUFDLFVBQVUsR0FBRyxVQUFVLENBQUM7UUFDN0IsSUFBSSxDQUFDLFVBQVUsR0FBRyxVQUFVLENBQUM7SUFDakMsQ0FBQztJQUVNLFdBQVcsQ0FBQyxrQkFBc0M7UUFDckQsSUFBSSxDQUFDLGNBQWMsR0FBRyxr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","assetPath":"Assets/ScreenShotScripts/IKController.ts","manifest":{"properties":[],"name":"IKController","description":""},"isCompiled":true}'
+  typescriptHash: 600d75d6a946bf260432add3ce7890ba
   onlyWriteTrigger: 0

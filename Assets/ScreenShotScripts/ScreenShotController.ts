@@ -1,6 +1,7 @@
 import { Camera, CameraClearFlags, Color, GameObject, RenderTexture, WaitForEndOfFrame } from 'UnityEngine';
 import { ZepetoScriptBehaviour } from 'ZEPETO.Script'
 import { ZepetoWorldContent } from 'ZEPETO.World';
+import ScreenShotModeManager from './ScreenShotModeManager';
 import UIController from './UIController';
 
 export default class ScreenShotController extends ZepetoScriptBehaviour {
@@ -63,6 +64,7 @@ export default class ScreenShotController extends ZepetoScriptBehaviour {
         yield new WaitForEndOfFrame();
         this.camera.Render();
         this.camera.targetTexture = null;
+        this.camera.cullingMask = this.camera.cullingMask | (1 << ScreenShotModeManager.zUILayer);
     }
 
     *RenderTargetTextureWithoutBackground()
@@ -81,6 +83,7 @@ export default class ScreenShotController extends ZepetoScriptBehaviour {
 
     private TakeScreenShotWithBackground() {
         // Specify the target texture and render the camera
+        this.camera.cullingMask = this.camera.cullingMask & ~(1 << ScreenShotModeManager.zUILayer);
         this.camera.targetTexture = this.renderTexture;
         this.StartCoroutine(this.RenderTargetTextureWithBackground());
 

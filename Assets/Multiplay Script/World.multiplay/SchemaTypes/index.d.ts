@@ -9,6 +9,7 @@ declare module "ZEPETO.Multiplay.Schema" {
 		jumpTriggers: MapSchema<Trigger>;
 		landingPoints: MapSchema<LandingPoint>;
 		selfieIKs: MapSchema<SelfieIK>;
+		gestures: MapSchema<Gesture>;
 	}
 	class Vector3 extends Schema {
 		x: number;
@@ -42,5 +43,9 @@ declare module "ZEPETO.Multiplay.Schema" {
 		isSelfie: boolean;
 		lookAt: Vector3;
 		targetAt: Vector3;
+		selfieSession: string;
+	}
+	class Gesture extends Schema {
+		clipIndex: number;
 	}
 }

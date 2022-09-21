@@ -74,7 +74,7 @@
 
 import {Sandbox, SandboxOptions, SandboxPlayer} from "ZEPETO.Multiplay";
 import {DataStorage} from "ZEPETO.Multiplay.DataStorage";
-import {LandingPoint, Player, SelfieIK, Transform, Trigger, Vector3} from "ZEPETO.Multiplay.Schema";
+import {Gesture, LandingPoint, Player, SelfieIK, Transform, Trigger, Vector3} from "ZEPETO.Multiplay.Schema";
 
 export default class extends Sandbox {
 
@@ -169,6 +169,20 @@ export default class extends Sandbox {
             player.isSelfieIK = selfieIK.isSelfie;
         });
 
+        this.onMessage("onGesture", (client, message) => {
+            const gesture = this.state.gestures.get(client.sessionId);
+            gesture.clipIndex = message.clipIndex;
+        });
+
+        this.onMessage("onSelfieWith", (client, message) => {
+            const selfieIK = this.state.selfieIKs.get(client.sessionId);
+            if(message.isActive && message.selfieSession) {
+                selfieIK.selfieSession = message.selfieSession;
+            } else {
+                selfieIK.selfieSession = '';
+            }
+        });
+
     }
     
    
@@ -204,8 +218,16 @@ export default class extends Sandbox {
         /* landingPoints Map------------------*/
 
         /* selfieIKs Map------------------*/
-        this.state.selfieIKs.set(client.sessionId, new SelfieIK());
-        /* selfieIKs Map------------------*/   
+        const selfieIK = new SelfieIK();
+        selfieIK.selfieSession = '';
+        this.state.selfieIKs.set(client.sessionId, selfieIK);
+        /* selfieIKs Map------------------*/ 
+        
+        /* gestures Map----------------------*/
+        const gesture = new Gesture();
+        gesture.clipIndex = -1;
+        this.state.gestures.set(client.sessionId, gesture);
+        /* gestures Map----------------------*/
 
         // [DataStorage] 입장한 Player의 DataStorage Load
         const storage: DataStorage = client.loadDataStorage();
@@ -233,5 +255,6 @@ export default class extends Sandbox {
         this.state.jumpTriggers.delete(client.sessionId);
         this.state.landingPoints.delete(client.sessionId);
         this.state.selfieIKs.delete(client.sessionId);
+        this.state.gestures.delete(client.sessionId);
     }
 }

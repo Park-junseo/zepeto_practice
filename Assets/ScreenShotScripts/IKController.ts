@@ -1,6 +1,8 @@
 import { ZepetoScriptBehaviour } from 'ZEPETO.Script'
 import { Transform, Animator, AvatarIKGoal, Quaternion , Vector3, HumanBodyBones } from 'UnityEngine'
 import { ZepetoCamera, ZepetoPlayers } from 'ZEPETO.Character.Controller';
+import PlayerIKController from '../Multiplay Script/PlayerIKController';
+import ClientStarterV2 from '../Multiplay Script/ClientStarterV2';
 
 export default class IKController extends ZepetoScriptBehaviour {
 
@@ -13,12 +15,20 @@ export default class IKController extends ZepetoScriptBehaviour {
 
     // Body and head weight setting for target
     // Controls how strongly the body reacts to the movement of the target
-    private _bodyWeight: number = 0.3;
-    private _headWeight: number = 0.7; 
+    public static readonly bodyWeight: number = 0.3;
+    public static readonly headWeight: number = 0.7; 
 
     //Whether or not to apply IK
     private useIKWeight: boolean = false;
     private animator: Animator;
+
+    //SelfieWith
+    private useSelfieWIthIKWeight: boolean = false;
+    private targetPlayerIK: PlayerIKController;
+
+    public static readonly bodyLightWeight: number = 0.1;
+    public static readonly headLightWeight: number = 0.7; 
+    
 
     private ikRotation: Quaternion;
     private ikPosition: Vector3;
@@ -42,6 +52,10 @@ export default class IKController extends ZepetoScriptBehaviour {
         this.useIKWeight = active;
     }
 
+    public SetSelfieWithIKActive(active: boolean) {
+        this.useSelfieWIthIKWeight = active;
+    }
+
     // Set Target to look at and Grip to reach out
     public SetTargetAndGrip(lookAtTarget: Transform, gripTarget: Transform, bodySource: Transform) {
         this.lookAtTarget = lookAtTarget;
@@ -49,8 +63,11 @@ export default class IKController extends ZepetoScriptBehaviour {
         this.bodySource = bodySource;
     }
 
-    OnAnimatorIK(layerIndex: number) {
+    public SetPlayerIK(playerIKController: PlayerIKController) {
+        this.targetPlayerIK = playerIKController;
+    }
 
+    private OnSelfieCamera() {
         // IK is not using IK, Third-person mode
         if(!this.useIKWeight) {
             return;
@@ -62,33 +79,11 @@ export default class IKController extends ZepetoScriptBehaviour {
             this.gripTarget == null)
             return;
 
-        // this.rightAramBones.forEach((bones)=>{
-        //     this.animator.SetBoneLocalRotation(bones, this.ikRotation);
-        // });
-
-        // this.animator.SetBoneLocalRotation(HumanBodyBones.RightShoulder, Quaternion.Euler(new Vector3(174, -1, -85)));
-        // this.animator.SetBoneLocalRotation(HumanBodyBones.UpperChest, Quaternion.Euler(new Vector3(4, 5, 0)));
-        // this.animator.SetBoneLocalRotation(HumanBodyBones.Chest, Quaternion.Euler(new Vector3(3, 0, 0)));
-        // const forward = ZepetoPlayers.instance.ZepetoCamera.cameraParent.forward;
-        // forward.y = 0;
-
-        // const look = ZepetoPlayers.instance.ZepetoCamera.cameraParent.position + forward*-3
-
 
         // Set the look weight when the body and head looks at the target. 
-        this.animator.SetLookAtWeight(1, this._bodyWeight, this._headWeight);
+        this.animator.SetLookAtWeight(1, IKController.bodyWeight, IKController.headWeight);
         // set lookAt target
         this.animator.SetLookAtPosition(this.lookAtTarget.position);
-        // this.animator.SetLookAtPosition(look);
-        //this.animator.SetLookAtPosition(ZepetoPlayers.instance.ZepetoCamera.cameraParent.position);
-
-
-        // console.log(`[IKController] ${ZepetoPlayers.instance.LocalPlayer.movingAxis.position.ToString()}`);
-        // this.animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
-        // this.animator.SetIKRotation(AvatarIKGoal.RightHand, this.gripTarget.rotation);//Quaternion.Euler(new Vector3(3,-3,3)));
-
-        // this.animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1);
-        // this.animator.SetIKRotation(AvatarIKGoal.RightHand, this.ikRotation);//Quaternion.Euler(new Vector3(3,-3,3)));
 
         // Set target weight for rightHand
         this.animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
@@ -101,6 +96,28 @@ export default class IKController extends ZepetoScriptBehaviour {
         //console.log(`[OnAnimatorIK] ${this.gripTarget.gameObject.name}/${this.lookAtTarget.gameObject.name}: ${this.gripTarget.position.ToString()}/${this.lookAtTarget.position.ToString()}`);
     }
 
+    private OnSelfieWith() {
+        if(!this.useSelfieWIthIKWeight) {
+            return;
+        }
+
+        // When using IK, Selfie mode
+        if (this.animator == null ||
+            this.targetPlayerIK === null ||
+            !this.targetPlayerIK.isSelfie)
+            return;
+
+        // Set the look weight when the body and head looks at the target. 
+        this.animator.SetLookAtWeight(1, IKController.bodyLightWeight, IKController.headLightWeight);
+        // set lookAt target
+        this.animator.SetLookAtPosition(this.targetPlayerIK.lookAtVector);        
+    }
+
+    OnAnimatorIK(layerIndex: number) {
+        this.OnSelfieCamera();
+        this.OnSelfieWith();
+    }
+
     // LateUpdate() {
     //     this.ikRotation = Quaternion.FromToRotation(this.bodySource.position, this.gripTarget.position);
     //     // this.ikPosition = ZepetoPlayers.instance.ZepetoCamera.cameraParent.transform.position;
@@ -108,11 +125,16 @@ export default class IKController extends ZepetoScriptBehaviour {
     //     // this.animator.SetBoneLocalRotation(HumanBodyBones.Chest, Quaternion.Euler(new Vector3(3, 0, 0)));
     // }
 
+    public StartSelfieWith(isSelfieWith:boolean, sessionId:string) {
+        this.useSelfieWIthIKWeight = isSelfieWith;
+        this.targetPlayerIK = (isSelfieWith)? ClientStarterV2.Instance.CurPlayerControlStates.get(sessionId).playerIK : null;
+    }
+
     public GetLookAtTransform() {return this.lookAtTarget; }
     public GetTargetAtTransform() {return this.gripTarget; }
 
-    public get bodyWeight() {return this._bodyWeight;}
-    public get headWeight() {return this._headWeight;}
+    // public get bodyWeight() {return this._bodyWeight;}
+    // public get headWeight() {return this._headWeight;}
 
     public GetLookAtAndTargetAt() {
         return [

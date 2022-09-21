@@ -1,0 +1,99 @@
+fileFormatVersion: 2
+guid: b44e78e7171128544a822510d31b3791
+importerOverride: ZEPETO.Script.Compiler:ZEPETO.Script:TypescriptAssetImporter
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: -1123457745, guid: 54cf806323ffe4418a4ce4cc63fe6b9d, type: 3}
+  isAssemblyDeclarations: 0
+  assembly: 
+  generateAllTypes: 1
+  types: []
+  generateWrapper: 0
+  overrideWrapperTypes: 0
+  wrapperTypes: []
+  WrapperFilters: []
+  wrapperOutputDirectory: Generated
+  compiledResult: '{"source":"\"use strict\";\r\nvar __decorate = (this && this.__decorate)
+    || function (decorators, target, key, desc) {\r\n    var c = arguments.length,
+    r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target,
+    key) : desc, d;\r\n    if (typeof Reflect === \"object\" && typeof Reflect.decorate
+    === \"function\") r = Reflect.decorate(decorators, target, key, desc);\r\n   
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i])
+    r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;\r\n   
+    return c > 3 && r && Object.defineProperty(target, key, r), r;\r\n};\r\nObject.defineProperty(exports,
+    \"__esModule\", { value: true });\r\nconst UnityEngine_1 = require(\"UnityEngine\");\r\nconst
+    UnityEngine_Events_1 = require(\"UnityEngine.Events\");\r\nconst UnityEngine_UI_1
+    = require(\"UnityEngine.UI\");\r\nconst ZEPETO_Character_Controller_1 = require(\"ZEPETO.Character.Controller\");\r\nconst
+    ZEPETO_Script_1 = require(\"ZEPETO.Script\");\r\nconst ClientStarterV2_1 = require(\"../Multiplay
+    Script/ClientStarterV2\");\r\nconst ScreenShotModeManager_1 = require(\"./ScreenShotModeManager\");\r\nconst
+    UIController_1 = require(\"./UIController\");\r\nclass SelfieStickController
+    extends ZEPETO_Script_1.ZepetoScriptBehaviour {\r\n    constructor() {\r\n       
+    super(...arguments);\r\n        this.isLocal = false;\r\n        this.isFirst
+    = true;\r\n        this.disabledSelfieWith = () => this.SetDisabledSelfieWith();\r\n   
+    }\r\n    Awake() {\r\n        //this.selfieUI.gameObject.SetActive(false);\r\n       
+    this.selfieUITrans = this.selfieUI.transform;\r\n    }\r\n    // Start() {   
+    \r\n    //     this.SetActiveSelfieWith(false, true);\r\n    // }\r\n    SetActiveSelfieWith(isSelfieWith)
+    {\r\n        if (isSelfieWith === this.isSelfieWith)\r\n            return;\r\n       
+    if (isSelfieWith && SelfieStickController.selfieUIEvent !== null) {\r\n           
+    SelfieStickController.selfieUIEvent.Invoke();\r\n        }\r\n        this.isSelfieWith
+    = isSelfieWith;\r\n        if (this.isSelfieWith) {\r\n            this.selfieButton.image.sprite
+    = UIController_1.default.Instance.selfieGreenSprite;\r\n        }\r\n       
+    else {\r\n            this.selfieButton.image.sprite = UIController_1.default.Instance.selfieBlueSprite;\r\n       
+    }\r\n        if (!this.isLocal && !this.isFirst) {\r\n            ClientStarterV2_1.default.Instance.SendMessageSelfieWith(this.isSelfieWith,
+    this.sessionId);\r\n            ScreenShotModeManager_1.default.Instance.GetIKController().StartSelfieWith(this.isSelfieWith,
+    this.sessionId);\r\n        }\r\n        if (!this.isLocal && this.isFirst) {\r\n           
+    console.log(`[SetActiveSelfieWith] first setting to ${isSelfieWith ? ''on'' :
+    ''off''}`);\r\n        }\r\n        this.isFirst = false;\r\n    }\r\n    SetDisabledSelfieWith()
+    {\r\n        this.SetActiveSelfieWith(false);\r\n        console.log(`[SelfieStickController]
+    ${this.sessionId}: off selfieUI count:${SelfieStickController.selfieUIEvent.GetPersistentEventCount()}`);\r\n   
+    }\r\n    SetActive(active) {\r\n        if (this.isActive === active)\r\n           
+    return;\r\n        this.isActive = active;\r\n        this.gameObject.SetActive(active);\r\n       
+    this.isActiveUI = !this.isLocal && active;\r\n        // this.SetActiveUI(active);\r\n       
+    // if(this.isLocal && active) {\r\n        //     if(SelfieStickController.selfieUIEvent
+    !== null) {\r\n        //         SelfieStickController.selfieUIEvent.Invoke();\r\n       
+    //     }\r\n        // }\r\n        if (this.isActiveUI) {\r\n            this.StartCoroutine(this.SetUIRotattion());\r\n       
+    }\r\n        else {\r\n            this.SetActiveSelfieWith(false);\r\n           
+    this.selfieUI.gameObject.SetActive(false);\r\n        }\r\n    }\r\n    *SetUIRotattion()
+    {\r\n        //const lateUpdate = new WaitForEndOfFrame();\r\n        // const
+    cameraTrans = ZepetoPlayers.instance.ZepetoCamera.camera.transform;\r\n       
+    this.selfieUI.worldCamera = ZEPETO_Character_Controller_1.ZepetoPlayers.instance.ZepetoCamera.camera;\r\n       
+    while (this.isActiveUI) {\r\n            // this.selfieUI.LookAt(cameraTrans);\r\n           
+    if (ZEPETO_Character_Controller_1.ZepetoPlayers.instance.LocalPlayer &&\r\n               
+    ZEPETO_Character_Controller_1.ZepetoPlayers.instance.ZepetoCamera?.gameObject.activeInHierarchy
+    &&\r\n                UnityEngine_1.Vector3.Distance(ZEPETO_Character_Controller_1.ZepetoPlayers.instance.LocalPlayer.zepetoPlayer.character.transform.position,
+    this.transform.position) < SelfieStickController.uiDistance) {\r\n               
+    this.selfieUI.gameObject.SetActive(true);\r\n                if (this.selfieUI.worldCamera)
+    {\r\n                    this.selfieUITrans.rotation = this.selfieUI.worldCamera.transform.rotation;\r\n               
+    }\r\n            }\r\n            else {\r\n                this.selfieUI.gameObject.SetActive(false);\r\n               
+    this.SetActiveSelfieWith(false);\r\n            }\r\n            // this.selfieUI.rotation
+    = Quaternion.Euler(Vector3.zero);\r\n            yield null;\r\n        }\r\n       
+    this.SetActiveSelfieWith(false);\r\n    }\r\n    // public SetActiveUI(active:boolean)
+    {\r\n    //     if(this.isActiveUI === active) return;\r\n    //     this.isActiveUI
+    = active;\r\n    //     if(!this.isLocal &&  active) {\r\n    //         // this.SetSelfieIcon(this.isSelfieWith);\r\n   
+    //         this.StartCoroutine(this.SetUIRotattion());\r\n    //     } else {\r\n   
+    //         this.SetActiveSelfieWith(false);\r\n    //         this.selfieUI.gameObject.SetActive(false);\r\n   
+    //     }\r\n    // }\r\n    Init(isLocal, sessionId) {\r\n        this.isLocal
+    = isLocal;\r\n        this.sessionId = sessionId;\r\n        if (!isLocal) {\r\n           
+    // this.eventCamera = camera;\r\n            this.selfieButton.onClick.AddListener(()
+    => {\r\n                this.SetActiveSelfieWith(!this.isSelfieWith);\r\n           
+    });\r\n            if (SelfieStickController.selfieUIEvent === null)\r\n               
+    SelfieStickController.selfieUIEvent = new UnityEngine_Events_1.UnityEvent();\r\n           
+    SelfieStickController.selfieUIEvent.AddListener(this.disabledSelfieWith);\r\n       
+    }\r\n        this.SetActive(false);\r\n        return this;\r\n    }\r\n    Disable()
+    {\r\n        if (!this.isLocal) {\r\n            SelfieStickController.selfieUIEvent.RemoveListener(this.disabledSelfieWith);\r\n           
+    console.log(`[SelfieStickController] ${this.sessionId}: destroy remove listener
+    count:${SelfieStickController.selfieUIEvent.GetPersistentEventCount()}`);\r\n           
+    // if(SelfieStickController.selfieUIEvent.GetPersistentEventCount() === 0) {\r\n           
+    //     SelfieStickController.selfieUIEvent.RemoveAllListeners();\r\n           
+    //     SelfieStickController.selfieUIEvent = null;\r\n            // }\r\n       
+    }\r\n    }\r\n}\r\nSelfieStickController.selfieUIEvent = null;\r\nSelfieStickController.uiDistance
+    = 2;\r\n__decorate([], SelfieStickController.prototype, \"selfieUI\", void 0);\r\n__decorate([],
+    SelfieStickController.prototype, \"selfieButton\", void 0);\r\nexports.default
+    = SelfieStickController;\r\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiU2VsZmllU3RpY2tDb250cm9sbGVyLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiU2VsZmllU3RpY2tDb250cm9sbGVyLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7O0FBQUEsNkNBQW9IO0FBQ3BILDJEQUE2RDtBQUM3RCxtREFBd0M7QUFDeEMsNkVBQTREO0FBQzVELGlEQUFxRDtBQUNyRCx5RUFBa0U7QUFDbEUsbUVBQTREO0FBQzVELGlEQUEwQztBQUUxQyxNQUFxQixxQkFBc0IsU0FBUSxxQ0FBcUI7SUFBeEU7O1FBT1ksWUFBTyxHQUFXLEtBQUssQ0FBQztRQVF4QixZQUFPLEdBQVksSUFBSSxDQUFDO1FBUXhCLHVCQUFrQixHQUFlLEdBQUUsRUFBRSxDQUFBLElBQUksQ0FBQyxxQkFBcUIsRUFBRSxDQUFDO0lBb0k5RSxDQUFDO0lBbElHLEtBQUs7UUFDRCw0Q0FBNEM7UUFDNUMsSUFBSSxDQUFDLGFBQWEsR0FBRyxJQUFJLENBQUMsUUFBUSxDQUFDLFNBQVMsQ0FBQztJQUNqRCxDQUFDO0lBRUQsZ0JBQWdCO0lBQ2hCLDZDQUE2QztJQUM3QyxJQUFJO0lBRUksbUJBQW1CLENBQUMsWUFBb0I7UUFDNUMsSUFBRyxZQUFZLEtBQUssSUFBSSxDQUFDLFlBQVk7WUFBRSxPQUFPO1FBRTlDLElBQUcsWUFBWSxJQUFJLHFCQUFxQixDQUFDLGFBQWEsS0FBSyxJQUFJLEVBQUU7WUFDN0QscUJBQXFCLENBQUMsYUFBYSxDQUFDLE1BQU0sRUFBRSxDQUFDO1NBQ2hEO1FBRUQsSUFBSSxDQUFDLFlBQVksR0FBRyxZQUFZLENBQUM7UUFDakMsSUFBRyxJQUFJLENBQUMsWUFBWSxFQUFFO1lBQ2xCLElBQUksQ0FBQyxZQUFZLENBQUMsS0FBSyxDQUFDLE1BQU0sR0FBRyxzQkFBWSxDQUFDLFFBQVEsQ0FBQyxpQkFBaUIsQ0FBQztTQUM1RTthQUFNO1lBQ0gsSUFBSSxDQUFDLFlBQVksQ0FBQyxLQUFLLENBQUMsTUFBTSxHQUFHLHNCQUFZ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","assetPath":"Assets/ScreenShotScripts/SelfieStickController.ts","manifest":{"properties":[{"assembly":"UnityEngine.UIModule","name":"selfieUI","type":"UnityEngine.Canvas","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[{"name":"SerializeField","args":[]}]},{"assembly":"UnityEngine.UI","name":"selfieButton","type":"UnityEngine.UI.Button","isArray":false,"initValue":[],"enumKeys":[],"enumValues":[],"attributes":[{"name":"SerializeField","args":[]}]}],"name":"SelfieStickController","description":""},"isCompiled":true}'
+  typescriptHash: 5f9435c8c1cff31cea804e3e76d2a461
+  onlyWriteTrigger: 0
